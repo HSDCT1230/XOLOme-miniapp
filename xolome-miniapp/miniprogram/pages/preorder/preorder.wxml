@@ -1,0 +1,116 @@
+<!--pages/preorder/preorder.wxml — 预订单页 V2.1-->
+<view class="page-preorder">
+  <!-- 优惠券提示 -->
+  <view class="coupon-banner" wx:if="{{hasCoupon}}">
+    <view class="coupon-icon">🎟️</view>
+    <view class="coupon-info">
+      <view class="coupon-title">¥500 首发代金券已激活</view>
+      <view class="coupon-desc">优惠码:{{couponCode}} · 实际支付立减¥500</view>
+    </view>
+  </view>
+
+  <!-- 价值主张 -->
+  <view class="value-banner">
+    <view class="value-tag">XOLOme X1 首发体验</view>
+    <view class="value-line">让喜欢的内容,成为你的桌面伙伴</view>
+    <view class="value-sub">先体验 · 再决定 · 后购买</view>
+  </view>
+
+  <!-- 三阶段流程时间轴 -->
+  <view class="section">
+    <view class="section-title">预定流程</view>
+    <view class="timeline">
+      <view class="timeline-item" wx:for="{{stages}}" wx:key="stage">
+        <view class="timeline-left">
+          <view class="timeline-dot" style="background: {{item.color}};">{{item.icon}}</view>
+          <view class="timeline-line" wx:if="{{index < stages.length - 1}}"></view>
+        </view>
+        <view class="timeline-content">
+          <view class="timeline-header">
+            <text class="timeline-stage">{{item.stage}}</text>
+            <text class="timeline-amount">{{item.amount}}</text>
+          </view>
+          <view class="timeline-desc">{{item.desc}}</view>
+          <view class="timeline-refund">{{item.detail}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 金额明细 -->
+  <view class="section">
+    <view class="section-title blue">金额明细</view>
+    <view class="amount-card">
+      <view class="amount-row" wx:for="{{breakdown}}" wx:key="label">
+        <text class="amount-label">{{item.label}}</text>
+        <text class="amount-value">¥{{item.amount}}</text>
+      </view>
+      <view class="amount-divider"></view>
+
+      <view class="amount-row" wx:if="{{hasCoupon}}">
+        <text class="amount-label c-coupon">首发代金券</text>
+        <text class="amount-value c-coupon">-¥{{pricing.coupon}}</text>
+      </view>
+
+      <view class="amount-row amount-retail">
+        <text class="amount-label">原价</text>
+        <text class="amount-value amount-strike">¥{{pricing.retail}}</text>
+      </view>
+      <view class="amount-row amount-total">
+        <text class="amount-label">实际支付</text>
+        <text class="amount-value amount-highlight">¥{{pricing.total}}</text>
+      </view>
+      <view class="amount-saved">首发立省 ¥{{pricing.saved}}</view>
+    </view>
+  </view>
+
+  <!-- 简化版规则说明 -->
+  <view class="section">
+    <view class="section-title purple">退款与代金券规则</view>
+    <view class="rule-card" bindtap="onViewRefundRule">
+      <view class="rule-item">
+        <view class="rule-tag rule-tag-green">体验资格</view>
+        <view class="rule-text">支付¥499即可锁定首发体验资格,60天内无理由退款</view>
+      </view>
+      <view class="rule-item">
+        <view class="rule-tag rule-tag-cyan">确认购买</view>
+        <view class="rule-text">补足¥1,499后进入确认阶段,30天内可申请退款</view>
+      </view>
+      <view class="rule-item">
+        <view class="rule-tag rule-tag-purple">代金券</view>
+        <view class="rule-text">365天有效,可用于XOLOme系列产品</view>
+      </view>
+      <view class="rule-more">点击查看详情 ›</view>
+    </view>
+  </view>
+
+  <!-- 协议勾选 -->
+  <view class="agreement-section">
+    <view class="agreement-check" bindtap="onToggleAgree">
+      <view class="checkbox {{agreed ? 'checkbox-checked' : ''}}">
+        <text wx:if="{{agreed}}" class="checkbox-icon">✓</text>
+      </view>
+      <view class="agreement-text">
+        我已阅读并同意
+        <text class="agreement-link" catchtap="onViewAgreement">《XOLOme X1首发预定协议》</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view class="bottom-placeholder"></view>
+
+  <!-- 底部支付按钮 -->
+  <view class="pay-bar">
+    <view class="pay-info">
+      <view class="pay-amount">¥{{pricing.deposit}}</view>
+      <view class="pay-tip">体验资格 · 60天可退</view>
+    </view>
+    <view
+      class="pay-btn {{(!agreed || paying) ? 'pay-btn-disabled' : ''}}"
+      bindtap="onPay"
+    >
+      {{paying ? '支付中...' : '立即锁定体验资格'}}
+    </view>
+  </view>
+</view>

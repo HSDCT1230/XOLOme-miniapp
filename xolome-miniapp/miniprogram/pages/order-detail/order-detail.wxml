@@ -1,0 +1,170 @@
+<!--pages/order-detail/order-detail.wxml — 订单详情-->
+<view class="page-order-detail" wx:if="{{order}}">
+  <!-- 顶部状态 -->
+  <view class="status-card">
+    <view class="status-icon">✓</view>
+    <view class="status-info">
+      <view class="status-text">{{stage.statusText}}</view>
+      <view class="status-sub">订单号:{{order.orderNo}}</view>
+    </view>
+    <view class="status-copy" bindtap="onCopyOrderNo">复制</view>
+  </view>
+
+  <!-- 倒计时 -->
+  <view class="countdown-card" wx:if="{{countdownText}}">
+    <view class="countdown-label">{{countdownLabel}}</view>
+    <view class="countdown-value">{{countdownText}}</view>
+  </view>
+
+  <!-- 简单规则提示 -->
+  <view class="section" wx:if="{{stage.ruleTip}}">
+    <view class="rule-tip-card">
+      <view class="rule-tip-icon">i</view>
+      <view class="rule-tip-text">{{stage.ruleTip}}</view>
+    </view>
+  </view>
+  <view class="section" wx:if="{{currentStageIndex >= 0}}">
+    <view class="section-title">预定进度</view>
+    <view class="progress-steps">
+      <view class="progress-step" wx:for="{{progressSteps}}" wx:key="label">
+        <view class="step-indicator">
+          <view
+            class="step-dot {{index <= currentStageIndex ? 'step-dot-active' : ''}}"
+            style="{{index <= currentStageIndex ? 'background:' + stage.statusColor + ';' : ''}}"
+          >
+            <text wx:if="{{index < currentStageIndex}}" class="step-check">✓</text>
+            <text wx:else>{{index + 1}}</text>
+          </view>
+          <view
+            wx:if="{{index < progressSteps.length - 1}}"
+            class="step-line {{index < currentStageIndex ? 'step-line-active' : ''}}"
+            style="{{index < currentStageIndex ? 'background:' + stage.statusColor + ';' : ''}}"
+          ></view>
+        </view>
+        <view class="step-label {{index <= currentStageIndex ? 'step-label-active' : ''}}">{{item.label}}</view>
+        <view class="step-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 金额明细 -->
+  <view class="section">
+    <view class="section-title">金额明细</view>
+    <view class="amount-card">
+      <view class="amount-row" wx:for="{{breakdown}}" wx:key="label">
+        <view class="amount-left">
+          <text class="amount-label">{{item.label}}</text>
+          <text class="amount-badge {{item.paid ? 'amount-paid' : 'amount-unpaid'}}">{{item.paid ? '已支付' : '待支付'}}</text>
+        </view>
+        <text class="amount-value {{item.paid ? '' : 'amount-unpaid-value'}}">¥{{item.amountY}}</text>
+      </view>
+      <view class="amount-divider"></view>
+      <view class="amount-row amount-total-row">
+        <text class="amount-total-label">总计</text>
+        <view class="amount-total-wrap">
+          <text class="amount-retail">¥{{order.retailAmountY}}</text>
+          <text class="amount-total-value">¥{{order.totalAmountY}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮区 -->
+  <view class="action-section" wx:if="{{stage.canSupplement || stage.canConfirmContinue || stage.canPayFinal || stage.canRefund || stage.actionText}}">
+    <view class="section-title">操作</view>
+
+    <!-- V2.1:补足确认购买 -->
+    <view
+      wx:if="{{stage.canSupplement}}"
+      class="btn btn-primary btn-block action-btn"
+      bindtap="onSupplement"
+    >
+      补足 ¥1,000 确认购买
+    </view>
+
+    <!-- 确认继续购买 -->
+    <view
+      wx:if="{{stage.canConfirmContinue}}"
+      class="btn btn-primary btn-block action-btn"
+      bindtap="onConfirmContinue"
+    >
+      确认继续购买
+    </view>
+
+    <!-- 支付尾款 -->
+    <view
+      wx:if="{{stage.canPayFinal}}"
+      class="btn btn-primary btn-block action-btn"
+      bindtap="onPayFinal"
+    >
+      支付尾款 ¥3,000
+    </view>
+
+    <!-- 查看代金券 -->
+    <view
+      wx:if="{{stage.actionText === '查看代金券'}}"
+      class="btn btn-outline btn-block action-btn"
+      bindtap="onViewVoucher"
+    >
+      {{stage.actionText}}
+    </view>
+
+    <!-- 申请退款 -->
+    <view
+      wx:if="{{stage.canRefund}}"
+      class="btn btn-outline btn-block action-btn btn-danger-outline"
+      bindtap="onRefund"
+    >
+      申请退款
+    </view>
+  </view>
+
+  <!-- 时间节点 -->
+  <view class="section" wx:if="{{timeline.length > 0}}">
+    <view class="section-title">时间节点</view>
+    <view class="timeline-card">
+      <view class="tl-item" wx:for="{{timeline}}" wx:key="label">
+        <view class="tl-left">
+          <view class="tl-dot {{item.isDeadline ? 'tl-dot-deadline' : ''}}"></view>
+          <view class="tl-line" wx:if="{{index < timeline.length - 1}}"></view>
+        </view>
+        <view class="tl-content">
+          <view class="tl-header">
+            <text class="tl-label">{{item.label}}</text>
+            <text class="tl-amount" wx:if="{{item.amount}}">¥{{item.amount}}</text>
+          </view>
+          <view class="tl-time">{{item.time}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单信息 -->
+  <view class="section">
+    <view class="section-title">订单信息</view>
+    <view class="info-card">
+      <view class="info-row">
+        <text class="info-label">订单号</text>
+        <text class="info-value">{{order.orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">创建时间</text>
+        <text class="info-value">{{order.createdAt}}</text>
+      </view>
+      <view class="info-row" wx:if="{{order.couponCode}}">
+        <text class="info-label">优惠码</text>
+        <text class="info-value c-primary">{{order.couponCode}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">订单状态</text>
+        <text class="info-value" style="color: {{stage.statusColor}};">{{order.statusText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部导航 -->
+  <view class="bottom-section">
+    <view class="btn btn-outline btn-block" bindtap="onBackCenter">返回订单中心</view>
+    <view class="btn btn-ghost-home btn-block" bindtap="onBackHome">返回首页</view>
+  </view>
+</view>

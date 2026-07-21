@@ -1,0 +1,22 @@
+# 依赖与系统
+node_modules/
+.DS_Store
+Thumbs.db
+__MACOSX/
+
+# 微信开发者工具本机配置
+xolome-miniapp/project.private.config.json
+
+# 云函数依赖（部署时再 npm install）
+xolome-miniapp/cloudfunctions/*/node_modules/
+
+# 编辑器 / AI 工作区
+.vscode/
+.idea/
+.workbuddy/
+.cursor/
+
+# 日志与临时文件
+*.log
+*.tmp
+.cache/

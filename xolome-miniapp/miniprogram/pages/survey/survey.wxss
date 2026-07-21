@@ -1,0 +1,189 @@
+/* pages/survey/survey.wxss — 问卷页 */
+
+.page-survey {
+  min-height: 100vh;
+  background: var(--xo-canvas);
+  padding-bottom: 180rpx;
+}
+
+/* === 顶部进度条 === */
+.progress-bar-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 24rpx 32rpx;
+  background: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.progress-step {
+  font-size: 26rpx;
+  color: #6ec73b;
+  font-weight: 700;
+}
+
+.progress-percent {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.progress-track {
+  height: 12rpx;
+  background: var(--xo-line);
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6ec73b 0%, #8fdf5a 100%);
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+/* === 题目区域 === */
+.question-area {
+  padding: 24rpx;
+}
+
+.question-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 36rpx 32rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid var(--xo-line);
+}
+
+.question-title {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 32rpx;
+}
+
+.q-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44rpx;
+  height: 44rpx;
+  padding: 0 10rpx;
+  background: var(--xo-green);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+  border-radius: 10rpx;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+
+.q-text {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  line-height: 1.4;
+  padding-top: 6rpx;
+}
+
+.q-required {
+  color: #ff595f;
+  font-size: 32rpx;
+  margin-left: 8rpx;
+  padding-top: 6rpx;
+}
+
+/* === 选项 === */
+radio-group, checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 24rpx;
+  background: #fff;
+  border: 2rpx solid var(--xo-line);
+  border-radius: 14rpx;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.option-item:active {
+  background: var(--xo-canvas);
+}
+
+.option-active {
+  background: rgba(110, 199, 59, 0.08);
+  border-color: var(--xo-green);
+}
+
+.option-item.option-active .option-label {
+  color: var(--xo-green-deep);
+  font-weight: 700;
+}
+
+.option-label {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  margin-left: 16rpx;
+  line-height: 1.5;
+}
+
+/* === 文本输入 === */
+.text-input-wrap {
+  position: relative;
+  background: var(--xo-canvas);
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.text-input {
+  width: 100%;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  min-height: 120rpx;
+}
+
+.input-placeholder {
+  color: #bbb;
+  font-size: 28rpx;
+}
+
+.input-counter {
+  text-align: right;
+  font-size: 22rpx;
+  color: #bbb;
+  margin-top: 12rpx;
+}
+
+/* === 底部操作按钮 === */
+.action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20rpx);
+  box-shadow: 0 -4rpx 24rpx rgba(0,0,0,0.06);
+}
+
+.btn-prev {
+  flex: 1;
+}
+
+.btn-next, .btn-submit {
+  flex: 2;
+}

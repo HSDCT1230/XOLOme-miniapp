@@ -1,0 +1,100 @@
+<!--subpackages/voucher/voucher.wxml — 代金券中心-->
+<view class="page-voucher">
+  <!-- 顶部统计 -->
+  <view class="stats-hero">
+    <view class="stats-title">我的代金券</view>
+    <view class="stats-amount">
+      <text class="stats-symbol">¥</text>
+      <text class="stats-value">{{totalValueY}}</text>
+    </view>
+    <view class="stats-sub">可用代金券总额</view>
+  </view>
+
+  <!-- Tab 筛选 -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{activeTab === item.key ? 'tab-active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="key"
+      data-key="{{item.key}}"
+      bindtap="onTabTap"
+    >
+      <text class="tab-label">{{item.label}}</text>
+      <text class="tab-count" wx:if="{{item.key === 'ACTIVE'}}">{{activeCount}}</text>
+      <text class="tab-count" wx:elif="{{item.key === 'USED'}}">{{usedCount}}</text>
+      <text class="tab-count" wx:elif="{{item.key === 'EXPIRED'}}">{{expiredCount}}</text>
+      <view class="tab-underline" wx:if="{{activeTab === item.key}}"></view>
+    </view>
+  </view>
+
+  <!-- 代金券列表 -->
+  <view class="voucher-list" wx:if="{{!isEmpty}}">
+    <view
+      class="voucher-card {{item.isUsed ? 'card-used' : ''}} {{item.isExpired ? 'card-expired' : ''}}"
+      wx:for="{{displayVouchers}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onVoucherTap"
+    >
+      <!-- 左侧金额 -->
+      <view class="voucher-left">
+        <view class="amount-wrap">
+          <text class="amount-symbol">¥</text>
+          <text class="amount-value">{{item.amountY}}</text>
+        </view>
+        <view class="amount-sub">代金券</view>
+        <!-- 状态水印 -->
+        <view class="voucher-stamp" wx:if="{{item.isUsed}}">已使用</view>
+        <view class="voucher-stamp" wx:if="{{item.isExpired}}">已过期</view>
+      </view>
+
+      <!-- 右侧信息 -->
+      <view class="voucher-right">
+        <view class="voucher-source">{{item.sourceText}}</view>
+        <view class="voucher-no">券号:{{item.voucherNo}}</view>
+
+        <!-- 倒计时 -->
+        <view class="countdown-wrap" wx:if="{{item.isActive}}">
+          <text class="countdown-label">有效期剩余</text>
+          <text class="countdown-value">{{countdownMap[item.id]}}</text>
+        </view>
+
+        <!-- 有效期 -->
+        <view class="expire-wrap">
+          <text class="expire-label">有效期至</text>
+          <text class="expire-value">{{item.expiredAt}}</text>
+        </view>
+
+        <!-- 操作 -->
+        <view class="voucher-actions" wx:if="{{item.isActive}}">
+          <view class="copy-btn" catchtap="onCopyVoucherNo" data-no="{{item.voucherNo}}">复制券号</view>
+          <view class="use-btn" catchtap="onGoShop">去使用 ›</view>
+        </view>
+      </view>
+
+      <!-- 装饰圆孔 -->
+      <view class="punch punch-top"></view>
+      <view class="punch punch-bottom"></view>
+      <!-- 虚线分割 -->
+      <view class="dashed-line"></view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{isEmpty && !loading}}">
+    <view class="empty-icon">🎟</view>
+    <view class="empty-text">暂无代金券</view>
+    <view class="empty-sub" wx:if="{{activeTab === 'ACTIVE'}}">预定商品后可获得代金券</view>
+    <view class="empty-sub" wx:elif="{{activeTab === 'USED'}}">暂无已使用的代金券</view>
+    <view class="empty-sub" wx:else>暂无已过期的代金券</view>
+    <view class="btn btn-primary btn-sm empty-btn" bindtap="onBackHome" wx:if="{{activeTab === 'ACTIVE'}}">去预定</view>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="bottom-tips" wx:if="{{!isEmpty}}">
+    <view class="tips-title">代金券说明</view>
+    <view class="tips-item">· 代金券由体验资格/确认购买超期未支付自动转换生成</view>
+    <view class="tips-item">· 代金券有效期 365 天,请在有效期内使用</view>
+    <view class="tips-item">· 代金券可在下单时抵扣相应金额</view>
+  </view>
+</view>

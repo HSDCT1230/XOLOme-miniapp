@@ -1,0 +1,105 @@
+<!--subpackages/user-center/center.wxml — 个人中心（微信「我」页规范）-->
+<view class="page">
+  <!-- 用户信息：可点编辑 -->
+  <view class="profile" bindtap="onEditProfile" hover-class="cell-hover" hover-stay-time="100">
+    <image wx:if="{{avatarUrl}}" class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+    <view wx:else class="avatar avatar-ph">{{initials}}</view>
+    <view class="profile-main">
+      <text class="name">{{nickname}}</text>
+      <text class="desc">编辑资料</text>
+    </view>
+    <text class="arrow">›</text>
+  </view>
+
+  <!-- 分组列表 -->
+  <view class="group">
+    <view class="cell" bindtap="onTapOrders" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">我的订单</text>
+      <view class="cell-extra">
+        <text class="cell-value" wx:if="{{ongoingCount > 0}}">{{ongoingCount}} 笔进行中</text>
+        <text class="cell-value" wx:else>查看全部</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="cell" bindtap="onTapVouchers" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">代金券</text>
+      <view class="cell-extra">
+        <text class="cell-value" wx:if="{{voucherCount > 0}}">{{voucherCount}} 张可用</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="group">
+    <view class="cell" bindtap="onTapSurvey" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">问卷优惠</text>
+      <view class="cell-extra">
+        <text class="cell-value green" wx:if="{{hasSurvey}}">已领取</text>
+        <text class="cell-value green" wx:else>领 ¥500</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="cell" wx:if="{{couponCode}}" catchtap="onCopyCoupon" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">优惠码</text>
+      <view class="cell-extra">
+        <text class="cell-value green">{{couponCode}}</text>
+        <text class="cell-action">复制</text>
+      </view>
+    </view>
+    <view class="cell" bindtap="onEditAddress" wx:if="{{!editingAddress}}" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">收货地址</text>
+      <view class="cell-extra">
+        <text class="cell-value" wx:if="{{addressFilled}}">{{address.name}}</text>
+        <text class="cell-value" wx:else>去添加</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="group" wx:if="{{addressFilled && !editingAddress}}">
+    <view class="addr" bindtap="onEditAddress" hover-class="cell-hover" hover-stay-time="100">
+      <text class="addr-t">{{address.name}} {{address.phone}}</text>
+      <text class="addr-d">{{address.region}} {{address.detail}}</text>
+    </view>
+  </view>
+
+  <view class="group form" wx:if="{{editingAddress}}">
+    <view class="field">
+      <text class="field-l">收货人</text>
+      <input class="field-i" placeholder="请填写姓名" value="{{draftAddress.name}}" data-field="name" bindinput="onAddressInput" />
+    </view>
+    <view class="field">
+      <text class="field-l">手机号</text>
+      <input class="field-i" type="number" maxlength="11" placeholder="请填写手机号" value="{{draftAddress.phone}}" data-field="phone" bindinput="onAddressInput" />
+    </view>
+    <view class="field">
+      <text class="field-l">地区</text>
+      <input class="field-i" placeholder="省 市 区" value="{{draftAddress.region}}" data-field="region" bindinput="onAddressInput" />
+    </view>
+    <view class="field">
+      <text class="field-l">详细地址</text>
+      <input class="field-i" placeholder="街道、门牌号等" value="{{draftAddress.detail}}" data-field="detail" bindinput="onAddressInput" />
+    </view>
+    <view class="form-actions">
+      <view class="btn-plain" bindtap="onCancelAddress" hover-class="btn-hover">取消</view>
+      <view class="btn-main" bindtap="onSaveAddress" hover-class="btn-main-hover">保存</view>
+    </view>
+  </view>
+
+  <view class="group">
+    <view class="cell" bindtap="onContactService" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">联系客服</text>
+      <view class="cell-extra">
+        <text class="cell-value">400-888-0000</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="cell" bindtap="onAbout" hover-class="cell-hover" hover-stay-time="100">
+      <text class="cell-title">关于</text>
+      <view class="cell-extra">
+        <text class="cell-value">{{version}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+</view>

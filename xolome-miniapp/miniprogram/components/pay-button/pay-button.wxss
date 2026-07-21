@@ -1,0 +1,71 @@
+.pay-button {
+  height: 96rpx;
+  border-radius: 48rpx;
+  background: linear-gradient(135deg, #6ec73b 0%, #8fdf5a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--xo-sh-green);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.pay-button:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
+
+.pay-button.is-disabled {
+  background: linear-gradient(135deg, #c0c0d0 0%, #d8d8e4 100%);
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.pay-button.is-loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.pay-content {
+  display: flex;
+  align-items: baseline;
+}
+
+.pay-label {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 600;
+  margin-right: 20rpx;
+}
+
+.pay-amount {
+  font-size: 44rpx;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pay-amount-symbol {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-right: 2rpx;
+}
+
+/* 加载动画 */
+.pay-loading-spinner {
+  width: 36rpx;
+  height: 36rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pay-spin 0.8s linear infinite;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+@keyframes pay-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

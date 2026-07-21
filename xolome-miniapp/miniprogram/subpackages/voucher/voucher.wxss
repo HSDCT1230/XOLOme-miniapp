@@ -1,0 +1,361 @@
+/* subpackages/voucher/voucher.wxss — 代金券中心 */
+
+.page-voucher {
+  min-height: 100vh;
+  background: var(--xo-canvas);
+  padding-bottom: 60rpx;
+}
+
+/* === 顶部统计 === */
+.stats-hero {
+  background: var(--xo-ink);
+  padding: 56rpx 32rpx 48rpx;
+  text-align: center;
+}
+
+.stats-title {
+  font-size: 28rpx;
+  color: rgba(255,255,255,0.8);
+}
+
+.stats-amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin: 20rpx 0 8rpx;
+}
+
+.stats-symbol {
+  font-size: 40rpx;
+  color: #fff;
+  font-weight: 700;
+  margin-right: 4rpx;
+}
+
+.stats-value {
+  font-size: 80rpx;
+  color: #fff;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.stats-sub {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.7);
+}
+
+/* === Tab 筛选栏 === */
+.tab-bar {
+  display: flex;
+  background: #fff;
+  margin: -24rpx 24rpx 0;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  border: 1rpx solid var(--xo-line);
+  position: relative;
+  z-index: 2;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0;
+  position: relative;
+  border-radius: 16rpx;
+  transition: all 0.2s;
+}
+
+.tab-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.tab-count {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.tab-active .tab-label {
+  color: #6ec73b;
+  font-weight: 700;
+}
+
+.tab-active .tab-count {
+  color: #6ec73b;
+}
+
+.tab-underline {
+  position: absolute;
+  bottom: 8rpx;
+  width: 48rpx;
+  height: 6rpx;
+  border-radius: 3rpx;
+  background: var(--xo-green);
+}
+
+.tab-active {
+  background: rgba(110,199,59,0.06);
+}
+
+/* === 代金券卡片 === */
+.voucher-list {
+  padding: 8rpx 0;
+}
+
+.voucher-card {
+  position: relative;
+  display: flex;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: linear-gradient(135deg, #6ec73b 0%, #8f6fc0 50%, #8fdf5a 100%);
+  box-shadow: 0 8rpx 24rpx rgba(110,199,59,0.25);
+  min-height: 240rpx;
+}
+
+.voucher-card:active {
+  transform: scale(0.98);
+}
+
+.card-used {
+  background: linear-gradient(135deg, #b2b2b2 0%, #c9c9c9 100%);
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
+}
+
+.card-expired {
+  background: linear-gradient(135deg, #999 0%, #b0b0b0 100%);
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
+}
+
+/* 左侧金额区 */
+.voucher-left {
+  position: relative;
+  width: 240rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx 16rpx;
+  flex-shrink: 0;
+}
+
+.amount-wrap {
+  display: flex;
+  align-items: baseline;
+}
+
+.amount-symbol {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: 700;
+  margin-right: 4rpx;
+}
+
+.amount-value {
+  font-size: 72rpx;
+  color: #fff;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.amount-sub {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.8);
+  margin-top: 8rpx;
+}
+
+/* 状态水印 */
+.voucher-stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-size: 40rpx;
+  font-weight: 800;
+  color: rgba(255,255,255,0.5);
+  border: 4rpx solid rgba(255,255,255,0.5);
+  border-radius: 12rpx;
+  padding: 4rpx 20rpx;
+  letter-spacing: 4rpx;
+}
+
+/* 右侧信息区 */
+.voucher-right {
+  flex: 1;
+  padding: 28rpx 28rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.voucher-source {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 700;
+}
+
+.voucher-no {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.7);
+  margin-top: 6rpx;
+  font-family: -apple-system, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 倒计时 */
+.countdown-wrap {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(255,255,255,0.18);
+  border-radius: 12rpx;
+  align-self: flex-start;
+}
+
+.countdown-label {
+  font-size: 20rpx;
+  color: rgba(255,255,255,0.85);
+  margin-right: 8rpx;
+}
+
+.countdown-value {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 有效期 */
+.expire-wrap {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.expire-label {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.7);
+  margin-right: 8rpx;
+}
+
+.expire-value {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+}
+
+/* 操作按钮 */
+.voucher-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.copy-btn {
+  font-size: 22rpx;
+  color: #fff;
+  padding: 6rpx 18rpx;
+  border: 1rpx solid rgba(255,255,255,0.4);
+  border-radius: 16rpx;
+  margin-right: 16rpx;
+}
+
+.use-btn {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 装饰圆孔 */
+.punch {
+  position: absolute;
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: var(--xo-canvas);
+  left: 240rpx;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.punch-top {
+  top: -16rpx;
+}
+
+.punch-bottom {
+  bottom: -16rpx;
+}
+
+/* 虚线分割 */
+.dashed-line {
+  position: absolute;
+  left: 240rpx;
+  top: 24rpx;
+  bottom: 24rpx;
+  width: 0;
+  border-left: 2rpx dashed rgba(255,255,255,0.35);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* === 空状态 === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0 80rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  font-weight: 600;
+  margin-top: 24rpx;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #bbb;
+  margin-top: 12rpx;
+}
+
+.empty-btn {
+  margin-top: 40rpx;
+}
+
+/* === 底部说明 === */
+.bottom-tips {
+  margin: 24rpx;
+  padding: 28rpx 32rpx;
+  background: rgba(110,199,59,0.06);
+  border-radius: 16rpx;
+}
+
+.tips-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #6ec73b;
+  margin-bottom: 12rpx;
+}
+
+.tips-item {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.8;
+}

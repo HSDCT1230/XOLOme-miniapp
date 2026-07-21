@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "订单中心",
+  "navigationBarBackgroundColor": "#ffffff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#ededed",
+  "backgroundTextStyle": "dark",
+  "enablePullDownRefresh": true
+}

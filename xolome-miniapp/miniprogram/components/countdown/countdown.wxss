@@ -1,0 +1,42 @@
+.countdown {
+  display: flex;
+  align-items: center;
+  background: var(--xo-canvas);
+  border-radius: 16rpx;
+  padding: 20rpx 28rpx;
+}
+
+.countdown-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.countdown-time {
+  display: flex;
+  align-items: baseline;
+}
+
+.cd-num {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.cd-unit {
+  font-size: 24rpx;
+  color: #999;
+  margin: 0 4rpx 0 2rpx;
+}
+
+.cd-expired-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ff595f;
+}
+
+.countdown.is-expired {
+  background: rgba(255, 89, 95, 0.08);
+}

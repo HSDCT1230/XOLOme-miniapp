@@ -1,0 +1,59 @@
+<wxs module="util">
+function inArray(arr, item) {
+  if (!arr || !arr.length) return false;
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] === item) return true;
+  }
+  return false;
+}
+module.exports = { inArray: inArray };
+</wxs>
+
+<view class="survey-form">
+  <!-- 题目 -->
+  <view class="question-title">
+    <text class="q-index">{{index + 1}}.</text>
+    <text class="q-text">{{question.title}}</text>
+  </view>
+
+  <!-- 单选 -->
+  <view wx:if="{{question.type === 'radio'}}" class="options">
+    <view
+      wx:for="{{question.options}}"
+      wx:key="*this"
+      class="option-card {{value === (item.value || item) ? 'selected' : ''}}"
+      data-value="{{item.value || item}}"
+      bindtap="onRadioTap"
+    >
+      <view class="option-radio {{value === (item.value || item) ? 'radio-on' : ''}}"></view>
+      <text class="option-label">{{item.label || item}}</text>
+    </view>
+  </view>
+
+  <!-- 多选 -->
+  <view wx:elif="{{question.type === 'checkbox'}}" class="options">
+    <view
+      wx:for="{{question.options}}"
+      wx:key="*this"
+      class="option-card {{util.inArray(value, item.value || item) ? 'selected' : ''}}"
+      data-value="{{item.value || item}}"
+      bindtap="onCheckboxTap"
+    >
+      <view class="option-checkbox {{util.inArray(value, item.value || item) ? 'checkbox-on' : ''}}">
+        <view wx:if="{{util.inArray(value, item.value || item)}}" class="checkmark"></view>
+      </view>
+      <text class="option-label">{{item.label || item}}</text>
+    </view>
+  </view>
+
+  <!-- 文本输入 -->
+  <view wx:elif="{{question.type === 'text'}}" class="text-wrap">
+    <input
+      class="text-input"
+      value="{{value}}"
+      placeholder="请输入..."
+      placeholder-class="input-placeholder"
+      bindinput="onTextInput"
+    />
+  </view>
+</view>

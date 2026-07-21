@@ -1,0 +1,133 @@
+<!--pages/survey/survey.wxml — 问卷页-->
+<wxs module="helper">
+function isChecked(answers, qid, val) {
+  if (!answers || !answers[qid]) return false;
+  var arr = answers[qid];
+  if (!arr || !arr.length) return false;
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] === val) return true;
+  }
+  return false;
+}
+function isRadioChecked(answers, qid, val) {
+  if (!answers || !answers[qid]) return false;
+  return answers[qid] === val;
+}
+module.exports = { isChecked: isChecked, isRadioChecked: isRadioChecked };
+</wxs>
+
+<view class="page-survey">
+  <!-- 顶部进度条 -->
+  <view class="progress-bar-wrap">
+    <view class="progress-info">
+      <text class="progress-step">{{currentStep + 1}} / {{totalSteps}}</text>
+      <text class="progress-percent">{{progressPercent}}%</text>
+    </view>
+    <view class="progress-track">
+      <view class="progress-fill" style="width: {{progressPercent}}%;"></view>
+    </view>
+  </view>
+
+  <!-- 题目区域 -->
+  <view class="question-area">
+    <!-- 第一题 -->
+    <view class="question-card" wx:if="{{currentQuestion}}">
+      <view class="question-title">
+        <text class="q-index">{{currentQuestion.id}}</text>
+        <text class="q-text">{{currentQuestion.title}}</text>
+        <text class="q-required" wx:if="{{currentQuestion.required}}">*</text>
+      </view>
+
+      <!-- 单选 -->
+      <radio-group
+        wx:if="{{currentQuestion.type === 'radio'}}"
+        data-qid="{{currentQuestion.id}}"
+        bindchange="onRadioChange"
+      >
+        <label
+          class="option-item {{helper.isRadioChecked(answers, currentQuestion.id, item.value) ? 'option-active' : ''}}"
+          wx:for="{{currentQuestion.options}}"
+          wx:key="value"
+        >
+          <radio value="{{item.value}}" checked="{{helper.isRadioChecked(answers, currentQuestion.id, item.value)}}" color="#6ec73b" />
+          <text class="option-label">{{item.label}}</text>
+        </label>
+      </radio-group>
+
+      <!-- 多选 -->
+      <checkbox-group
+        wx:if="{{currentQuestion.type === 'checkbox'}}"
+        data-qid="{{currentQuestion.id}}"
+        bindchange="onCheckboxChange"
+      >
+        <label
+          class="option-item {{helper.isChecked(answers, currentQuestion.id, item.value) ? 'option-active' : ''}}"
+          wx:for="{{currentQuestion.options}}"
+          wx:key="value"
+        >
+          <checkbox value="{{item.value}}" checked="{{helper.isChecked(answers, currentQuestion.id, item.value)}}" color="#6ec73b" />
+          <text class="option-label">{{item.label}}</text>
+        </label>
+      </checkbox-group>
+
+      <!-- 文本输入 -->
+      <view class="text-input-wrap" wx:if="{{currentQuestion.type === 'text'}}">
+        <textarea
+          class="text-input"
+          data-qid="{{currentQuestion.id}}"
+          value="{{answers[currentQuestion.id]}}"
+          placeholder="{{currentQuestion.placeholder}}"
+          placeholder-class="input-placeholder"
+          maxlength="200"
+          auto-height
+          bindinput="onTextInput"
+        />
+        <view class="input-counter">{{answers[currentQuestion.id] ? answers[currentQuestion.id].length : 0}}/200</view>
+      </view>
+    </view>
+
+    <!-- 第二题(同页文本题) -->
+    <view class="question-card" wx:if="{{nextQuestion}}">
+      <view class="question-title">
+        <text class="q-index">{{nextQuestion.id}}</text>
+        <text class="q-text">{{nextQuestion.title}}</text>
+        <text class="q-required" wx:if="{{nextQuestion.required}}">*</text>
+      </view>
+
+      <view class="text-input-wrap">
+        <textarea
+          class="text-input"
+          data-qid="{{nextQuestion.id}}"
+          value="{{answers[nextQuestion.id]}}"
+          placeholder="{{nextQuestion.placeholder}}"
+          placeholder-class="input-placeholder"
+          maxlength="200"
+          auto-height
+          bindinput="onTextInput"
+        />
+        <view class="input-counter">{{answers[nextQuestion.id] ? answers[nextQuestion.id].length : 0}}/200</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮 -->
+  <view class="action-bar">
+    <view class="btn btn-outline btn-prev {{isFirstStep ? 'btn-disabled' : ''}}" bindtap="onPrev">
+      上一题
+    </view>
+    <view
+      wx:if="{{!isLastStep}}"
+      class="btn btn-primary btn-next"
+      bindtap="onNext"
+    >
+      下一题
+    </view>
+    <view
+      wx:if="{{isLastStep}}"
+      class="btn btn-primary btn-submit {{submitting ? 'btn-disabled' : ''}}"
+      bindtap="onSubmit"
+    >
+      {{submitting ? '提交中...' : '提交问卷'}}
+    </view>
+  </view>
+</view>

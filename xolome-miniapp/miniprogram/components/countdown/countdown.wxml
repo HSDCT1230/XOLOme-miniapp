@@ -1,0 +1,24 @@
+<view class="countdown {{expired ? 'is-expired' : ''}}">
+  <text class="countdown-label">{{label}}</text>
+  <view class="countdown-time" wx:if="{{!expired}}">
+    <block wx:if="{{days > 0}}">
+      <text class="cd-num">{{days}}</text>
+      <text class="cd-unit">天</text>
+    </block>
+    <block wx:if="{{hours > 0 || days > 0}}">
+      <text class="cd-num">{{hours}}</text>
+      <text class="cd-unit">时</text>
+    </block>
+    <block wx:if="{{minutes > 0 || hours > 0 || days > 0}}">
+      <text class="cd-num">{{minutes}}</text>
+      <text class="cd-unit">分</text>
+    </block>
+    <block wx:if="{{days === 0 && hours === 0 && minutes === 0}}">
+      <text class="cd-num">{{seconds}}</text>
+      <text class="cd-unit">秒</text>
+    </block>
+  </view>
+  <view class="countdown-time" wx:else>
+    <text class="cd-expired-text">已结束</text>
+  </view>
+</view>

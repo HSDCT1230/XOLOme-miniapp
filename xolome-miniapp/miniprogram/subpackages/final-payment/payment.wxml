@@ -1,0 +1,101 @@
+<!--subpackages/final-payment/payment.wxml — 尾款支付-->
+<view class="page-payment" wx:if="{{order}}">
+  <!-- 支付成功页 -->
+  <block wx:if="{{paySuccess}}">
+    <view class="success-hero">
+      <view class="success-icon">✓</view>
+      <view class="success-title">尾款支付成功</view>
+      <view class="success-sub">我们将尽快为您安排发货</view>
+      <view class="success-amount">¥{{finalAmountY}}</view>
+    </view>
+    <view class="success-actions">
+      <view class="btn btn-primary btn-block" bindtap="onViewOrder">查看订单</view>
+      <view class="btn btn-outline btn-block mt-24" bindtap="onBackHome">返回首页</view>
+    </view>
+  </block>
+
+  <!-- 支付页 -->
+  <block wx:else>
+    <!-- 尾款金额大字展示 -->
+    <view class="amount-hero">
+      <view class="hero-tag">尾款支付</view>
+      <view class="hero-amount">
+        <text class="hero-symbol">¥</text>
+        <text class="hero-value">{{finalAmountY}}</text>
+      </view>
+      <view class="hero-order">订单号:{{order.orderNo}}</view>
+    </view>
+
+    <!-- 金额明细 -->
+    <view class="section">
+      <view class="section-title">金额明细</view>
+      <view class="amount-card">
+        <view class="amount-row">
+          <text class="amount-label">零售价</text>
+          <text class="amount-value amount-retail">¥{{retailAmountY}}</text>
+        </view>
+        <view class="amount-row">
+          <text class="amount-label">已支付（体验资格+确认购买）</text>
+          <text class="amount-value">¥{{paidAmountY}}</text>
+        </view>
+        <view class="amount-row">
+          <text class="amount-label">问卷优惠</text>
+          <text class="amount-value amount-saved">-¥{{savedAmountY}}</text>
+        </view>
+        <view class="amount-divider"></view>
+        <view class="amount-row amount-final-row">
+          <text class="amount-final-label">待付尾款</text>
+          <text class="amount-final-value">¥{{finalAmountY}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 支付方式 -->
+    <view class="section">
+      <view class="section-title">支付方式</view>
+      <view class="method-list">
+        <view
+          class="method-item {{item.selected ? 'method-selected' : ''}} {{item.disabled ? 'method-disabled' : ''}}"
+          wx:for="{{payMethods}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onMethodTap"
+        >
+          <view class="method-icon">{{item.icon}}</view>
+          <view class="method-info">
+            <view class="method-name">{{item.name}}</view>
+            <view class="method-desc">{{item.desc}}</view>
+          </view>
+          <view class="method-check {{item.selected ? 'method-check-on' : ''}}">
+            <text wx:if="{{item.selected}}">✓</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 温馨提示 -->
+    <view class="tips-card">
+      <view class="tips-title">支付须知</view>
+      <view class="tips-item">· 尾款支付后订单进入发货流程</view>
+      <view class="tips-item">· 发货后可在订单详情查看物流信息</view>
+      <view class="tips-item">· 如有疑问请联系客服</view>
+    </view>
+
+    <!-- 底部支付按钮 -->
+    <view class="bottom-bar">
+      <view class="bottom-left">
+        <text class="bottom-label">应付</text>
+        <view class="bottom-amount">
+          <text class="bottom-symbol">¥</text>
+          <text class="bottom-value">{{finalAmountY}}</text>
+        </view>
+      </view>
+      <view
+        class="pay-btn {{paying ? 'pay-btn-loading' : ''}}"
+        bindtap="onPay"
+      >
+        {{paying ? '支付中...' : '立即支付'}}
+      </view>
+    </view>
+  </block>
+</view>

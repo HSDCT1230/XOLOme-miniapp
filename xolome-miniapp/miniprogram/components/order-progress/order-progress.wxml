@@ -1,0 +1,31 @@
+<view class="order-progress">
+  <!-- 背景线 -->
+  <view class="progress-line-bg"></view>
+  <!-- 前景线（已完成部分） -->
+  <view
+    class="progress-line-fg"
+    style="width: {{stages.length > 1 ? (stageIndex / (stages.length - 1)) * 100 : 0}}%"
+  ></view>
+
+  <!-- 节点 -->
+  <view class="progress-nodes">
+    <view
+      wx:for="{{stages}}"
+      wx:key="key"
+      class="progress-node"
+    >
+      <view class="node-circle-wrap">
+        <!-- 已完成：实心圆 -->
+        <view wx:if="{{index < stageIndex}}" class="node-circle solid"></view>
+        <!-- 当前步：放大圆 + 脉冲动画 -->
+        <view wx:elif="{{index === stageIndex}}" class="node-circle current">
+          <view class="pulse-ring"></view>
+        </view>
+        <!-- 未开始：空心圆 -->
+        <view wx:else class="node-circle hollow"></view>
+      </view>
+      <text class="node-name {{index <= stageIndex ? 'active' : ''}}">{{item.name}}</text>
+      <text wx:if="{{item.amount}}" class="node-amount {{index <= stageIndex ? 'active' : ''}}">{{item.amount}}</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,16 @@
+<!--pages/webview/webview.wxml-->
+<web-view
+  wx:if="{{url && !loadError}}"
+  src="{{url}}"
+  binderror="onWebViewError"
+/>
+
+<view wx:if="{{loadError}}" class="fallback">
+  <text class="fallback-title">暂时无法打开 DIY 体验</text>
+  <text class="fallback-desc">{{errorHint}}</text>
+  <text class="fallback-url">{{url}}</text>
+  <view class="fallback-actions">
+    <button class="btn-primary" bindtap="onCopyLink">复制链接到浏览器打开</button>
+    <button class="btn-ghost" bindtap="onRetry">重试</button>
+  </view>
+</view>

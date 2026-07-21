@@ -1,0 +1,75 @@
+<!--subpackages/refund/refund.wxml — 退款申请-->
+<view class="page-refund" wx:if="{{order}}">
+  <!-- 退款金额展示 -->
+  <view class="amount-hero">
+    <view class="hero-label">可退款金额</view>
+    <view class="hero-amount">
+      <text class="hero-symbol">¥</text>
+      <text class="hero-value">{{refundAmountY}}</text>
+    </view>
+    <view class="hero-status">当前状态:{{order.statusText}}</view>
+  </view>
+
+  <!-- 订单信息 -->
+  <view class="section">
+    <view class="section-title">订单信息</view>
+    <view class="info-card">
+      <view class="info-row">
+        <text class="info-label">订单号</text>
+        <text class="info-value">{{order.orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">订单状态</text>
+        <text class="info-value c-warning">{{order.statusText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退款规则 -->
+  <view class="section">
+    <view class="section-title">退款规则</view>
+    <view class="rules-card">
+      <view class="rule-row" wx:for="{{rules}}" wx:key="label">
+        <text class="rule-label">{{item.label}}</text>
+        <text class="rule-value {{item.highlight ? 'rule-value-highlight' : ''}}">{{item.value}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退款原因 -->
+  <view class="section">
+    <view class="section-title">退款原因（选填）</view>
+    <view class="reason-card">
+      <textarea
+        class="reason-input"
+        placeholder="请填写退款原因,帮助我们改进服务…"
+        placeholder-class="reason-placeholder"
+        value="{{reason}}"
+        bindinput="onReasonInput"
+        maxlength="200"
+        auto-height
+      />
+      <view class="reason-count">{{reasonLength}}/200</view>
+    </view>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tips-card">
+    <view class="tips-title">温馨提示</view>
+    <view class="tips-item">· 退款将原路退回您的支付账户</view>
+    <view class="tips-item">· 退款到账时间通常为 1-3 个工作日</view>
+    <view class="tips-item">· 超过退款窗口期将自动转为代金券</view>
+    <view class="tips-item tips-contact" bindtap="onContactService">· 如有疑问,联系客服 ›</view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <view class="btn btn-outline btn-back" bindtap="onBack">再想想</view>
+    <view
+      class="btn btn-danger btn-confirm {{acting ? 'btn-disabled' : ''}}"
+      bindtap="onConfirmRefund"
+    >
+      确认退款
+    </view>
+  </view>
+</view>

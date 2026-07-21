@@ -1,0 +1,125 @@
+.order-progress {
+  position: relative;
+  padding: 48rpx 32rpx 32rpx;
+}
+
+/* 进度线 */
+.progress-line-bg {
+  position: absolute;
+  top: 64rpx;
+  left: 14%;
+  right: 14%;
+  height: 4rpx;
+  background: var(--xo-line);
+  z-index: 0;
+}
+
+.progress-line-fg {
+  position: absolute;
+  top: 64rpx;
+  left: 14%;
+  height: 4rpx;
+  background: linear-gradient(90deg, #6ec73b, #8fdf5a);
+  z-index: 1;
+  transition: width 0.4s ease;
+  border-radius: 2rpx;
+}
+
+/* 节点容器 */
+.progress-nodes {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.node-circle-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40rpx;
+  margin-bottom: 16rpx;
+}
+
+/* 圆点样式 */
+.node-circle {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.node-circle.solid {
+  background: #6ec73b;
+  border: none;
+}
+
+.node-circle.hollow {
+  background: #fff;
+  border: 4rpx solid #d0d0d0;
+}
+
+.node-circle.current {
+  width: 36rpx;
+  height: 36rpx;
+  background: #6ec73b;
+  border: none;
+  position: relative;
+  z-index: 2;
+}
+
+/* 脉冲动画 */
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36rpx;
+  height: 36rpx;
+  margin-top: -18rpx;
+  margin-left: -18rpx;
+  border-radius: 50%;
+  border: 4rpx solid #6ec73b;
+  animation: pulse 1.6s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* 文字 */
+.node-name {
+  font-size: 26rpx;
+  color: #999;
+  font-weight: 500;
+}
+
+.node-name.active {
+  color: #333;
+  font-weight: 600;
+}
+
+.node-amount {
+  font-size: 22rpx;
+  color: #bbb;
+  margin-top: 4rpx;
+}
+
+.node-amount.active {
+  color: #6ec73b;
+  font-weight: 600;
+}

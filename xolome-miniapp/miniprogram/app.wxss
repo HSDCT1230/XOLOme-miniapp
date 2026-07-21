@@ -1,0 +1,304 @@
+/* =====================================================
+   XOLOme X1 · 全局设计系统 (Design System)
+   规范：XOLO VI 全色板 + 规范字体 + 令牌化 Design Tokens
+   -----------------------------------------------------
+   主色  XOLO绿 #6ec73b  | 基础 白 / 品牌黑 #333
+   辅助  红#ff595f 橙#ff8f00 蓝#4589d6 紫#724e9b
+   ===================================================== */
+
+/* ===== Design Tokens（CSS 自定义属性，全页可用 var() 引用）===== */
+page {
+  /* —— 品牌色板（VI 规范） —— */
+  --xo-green:        #6ec73b;
+  --xo-green-deep:   #4a9c2a;
+  --xo-green-light:  #8fdf5a;
+  --xo-red:          #ff595f;
+  --xo-red-deep:     #e23b41;
+  --xo-orange:       #ff8f00;
+  --xo-blue:         #4589d6;
+  --xo-blue-light:   #7fb3e6;
+  --xo-purple:       #724e9b;
+  --xo-purple-light: #9b7fc4;
+
+  /* —— 中性墨色阶 —— */
+  --xo-ink:    #333333;   /* 品牌黑（非纯黑）*/
+  --xo-ink-2:  #555555;
+  --xo-ink-3:  #888888;
+  --xo-ink-4:  #bbbbbb;
+  --xo-line:   #eceef0;
+  --xo-line-2: #f3f5f4;
+
+  /* —— 表面 / 画布 —— */
+  --xo-surface: #ffffff;
+  --xo-canvas:  #f4f7f5;          /* 主画布：极淡中性绿灰，干净不抢戏 */
+  --xo-canvas-2:#eef4ea;          /* 次画布：微绿 */
+
+  /* —— 圆角 —— */
+  --xo-r-xs: 10rpx;
+  --xo-r-sm: 16rpx;
+  --xo-r-md: 24rpx;
+  --xo-r-lg: 32rpx;
+  --xo-r-pill: 999rpx;
+
+  /* —— 阴影（有层次，避免死板平板） —— */
+  --xo-sh-1: 0 2rpx 12rpx rgba(24,32,24,0.05);
+  --xo-sh-2: 0 6rpx 24rpx rgba(24,32,24,0.08);
+  --xo-sh-3: 0 14rpx 44rpx rgba(24,32,24,0.12);
+  --xo-sh-green: 0 10rpx 28rpx rgba(110,199,59,0.30);
+  --xo-sh-blue:  0 10rpx 28rpx rgba(69,137,214,0.30);
+  --xo-sh-red:   0 10rpx 28rpx rgba(255,89,95,0.30);
+  --xo-sh-purple:0 10rpx 28rpx rgba(114,78,155,0.30);
+
+  /* —— 间距尺度 —— */
+  --xo-s-1: 8rpx;  --xo-s-2: 16rpx; --xo-s-3: 24rpx;
+  --xo-s-4: 32rpx; --xo-s-5: 48rpx; --xo-s-6: 64rpx;
+
+  /* —— 规范字体栈 —— */
+  --xo-font: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB",
+             -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --xo-font-num: "DIN Alternate", "Helvetica Neue", Arial, sans-serif;
+
+  /* —— 当前强调色（默认主绿，页面可局部覆盖 --xo-accent） —— */
+  --xo-accent: var(--xo-green);
+
+  font-family: var(--xo-font);
+  font-size: 28rpx;
+  color: var(--xo-ink);
+  background: var(--xo-canvas);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.2rpx;
+}
+
+/* ===== 排版层级 ===== */
+.t-h1 { font-size: 48rpx; font-weight: 800; color: var(--xo-ink); line-height: 1.25; letter-spacing: 1rpx; }
+.t-h2 { font-size: 40rpx; font-weight: 800; color: var(--xo-ink); line-height: 1.3; }
+.t-h3 { font-size: 34rpx; font-weight: 700; color: var(--xo-ink); line-height: 1.35; }
+.t-sub { font-size: 26rpx; color: var(--xo-ink-3); line-height: 1.6; }
+.t-caption { font-size: 22rpx; color: var(--xo-ink-4); }
+.t-num { font-family: var(--xo-font-num); font-variant-numeric: tabular-nums; }
+
+/* ===== 主题色文字 ===== */
+.c-primary { color: var(--xo-green); }
+.c-accent  { color: var(--xo-blue); }
+.c-danger  { color: var(--xo-red); }
+.c-warning { color: var(--xo-orange); }
+.c-purple  { color: var(--xo-purple); }
+.c-dark    { color: var(--xo-ink); }
+.c-gray    { color: var(--xo-ink-3); }
+.c-white   { color: #fff; }
+.c-soft    { color: var(--xo-ink-2); }
+
+/* ===== 主题色浅底 ===== */
+.bg-primary { background: var(--xo-green); }
+.bg-accent  { background: var(--xo-blue); }
+.bg-danger  { background: var(--xo-red); }
+.bg-warning { background: var(--xo-orange); }
+.bg-purple  { background: var(--xo-purple); }
+.bg-dark    { background: var(--xo-ink); }
+.bg-white   { background: var(--xo-surface); }
+.bg-canvas  { background: var(--xo-canvas); }
+
+/* 浅色语义底（低饱和，用于标签/区块） */
+.fill-green  { background: rgba(110,199,59,0.12);  color: var(--xo-green-deep); }
+.fill-blue   { background: rgba(69,137,214,0.14);  color: var(--xo-blue); }
+.fill-red    { background: rgba(255,89,95,0.12);   color: var(--xo-red); }
+.fill-orange { background: rgba(255,143,0,0.14);   color: #cc7200; }
+.fill-purple { background: rgba(114,78,155,0.14);  color: var(--xo-purple); }
+
+/* ===== 通用按钮 ===== */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  border-radius: var(--xo-r-pill);
+  font-size: 30rpx;
+  font-weight: 700;
+  padding: 0 48rpx;
+  box-sizing: border-box;
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+  border: none;
+  line-height: 1;
+}
+.btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.btn-primary { background: linear-gradient(135deg, var(--xo-green) 0%, var(--xo-green-light) 100%); color: #fff; box-shadow: var(--xo-sh-green); }
+.btn-accent  { background: linear-gradient(135deg, var(--xo-blue) 0%, var(--xo-blue-light) 100%); color: #fff; box-shadow: var(--xo-sh-blue); }
+.btn-danger  { background: linear-gradient(135deg, var(--xo-red) 0%, #ff8a8e 100%); color: #fff; box-shadow: var(--xo-sh-red); }
+.btn-warning { background: linear-gradient(135deg, var(--xo-orange) 0%, #ffb84d 100%); color: #fff; box-shadow: 0 10rpx 28rpx rgba(255,143,0,0.30); }
+.btn-purple  { background: linear-gradient(135deg, var(--xo-purple) 0%, var(--xo-purple-light) 100%); color: #fff; box-shadow: var(--xo-sh-purple); }
+.btn-dark    { background: linear-gradient(135deg, #3a3a3a 0%, var(--xo-ink) 100%); color: #fff; box-shadow: var(--xo-sh-2); }
+
+.btn-outline { background: transparent; border: 2rpx solid var(--xo-green); color: var(--xo-green-deep); }
+.btn-outline.btn-accent  { border-color: var(--xo-blue);  color: var(--xo-blue); }
+.btn-outline.btn-danger  { border-color: var(--xo-red);   color: var(--xo-red); }
+.btn-outline.btn-purple  { border-color: var(--xo-purple); color: var(--xo-purple); }
+
+.btn-ghost { background: rgba(51,51,51,0.06); color: var(--xo-ink); }
+
+.btn-sm { height: 64rpx; font-size: 26rpx; border-radius: var(--xo-r-pill); padding: 0 32rpx; }
+.btn-lg { height: 100rpx; font-size: 34rpx; }
+.btn-block { width: 100%; }
+
+.btn-disabled { opacity: 0.45; pointer-events: none; box-shadow: none; }
+
+/* ===== 通用卡片 ===== */
+.card {
+  background: var(--xo-surface);
+  border-radius: var(--xo-r-md);
+  padding: var(--xo-s-4);
+  margin: var(--xo-s-3);
+  box-shadow: var(--xo-sh-1);
+  position: relative;
+  overflow: hidden;
+}
+.card-flat { box-shadow: none; border: 1rpx solid var(--xo-line); }
+.card-2 { box-shadow: var(--xo-sh-2); }
+.card-3 { box-shadow: var(--xo-sh-3); }
+
+/* 顶部细高亮条，让卡片有"品牌感"而不喧宾夺主 */
+.card-accent::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, var(--xo-green), var(--xo-green-light));
+}
+.card-accent-blue::before  { background: linear-gradient(90deg, var(--xo-blue), var(--xo-blue-light)); }
+.card-accent-red::before   { background: linear-gradient(90deg, var(--xo-red), #ff8a8e); }
+.card-accent-orange::before{ background: linear-gradient(90deg, var(--xo-orange), #ffb84d); }
+.card-accent-purple::before{ background: linear-gradient(90deg, var(--xo-purple), var(--xo-purple-light)); }
+
+/* ===== 布局 ===== */
+.container { padding: var(--xo-s-3); min-height: 100vh; box-sizing: border-box; }
+.flex       { display: flex; }
+.flex-col   { display: flex; flex-direction: column; }
+.flex-center{ display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-1 { flex: 1; }
+.flex-wrap { flex-wrap: wrap; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+
+/* ===== 间距 ===== */
+.mt-1 { margin-top: 8rpx; }   .mt-2 { margin-top: 16rpx; }
+.mt-3 { margin-top: 24rpx; }  .mt-4 { margin-top: 32rpx; }
+.mt-5 { margin-top: 48rpx; }  .mt-6 { margin-top: 64rpx; }
+.mb-2 { margin-bottom: 16rpx; } .mb-3 { margin-bottom: 24rpx; } .mb-4 { margin-bottom: 32rpx; }
+.mx-3 { margin-left: 24rpx; margin-right: 24rpx; }
+.p-3  { padding: 24rpx; }     .p-4 { padding: 32rpx; }
+.px-3 { padding-left: 24rpx; padding-right: 24rpx; }
+.py-3 { padding-top: 24rpx; padding-bottom: 24rpx; }
+
+/* ===== 文字 ===== */
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.font-bold   { font-weight: 700; }
+.font-800    { font-weight: 800; }
+.truncate    { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ===== 分割线 ===== */
+.divider { height: 1rpx; background: var(--xo-line); margin: 24rpx 0; }
+.hairline { height: 1rpx; background: var(--xo-line-2); }
+.divider-dashed { border-top: 1rpx dashed var(--xo-line); margin: 24rpx 0; }
+
+/* ===== 通用 Section 标题（彩色强调条，可用 --xo-accent 局部覆盖） ===== */
+.section { margin: var(--xo-s-3); }
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--xo-ink);
+  margin-bottom: 24rpx;
+  padding-left: 20rpx;
+  border-left: 6rpx solid var(--xo-accent, var(--xo-green));
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+/* 彩色变体（无需改 wxml，直接加 class） */
+.section-title.blue   { --xo-accent: var(--xo-blue); }
+.section-title.red    { --xo-accent: var(--xo-red); }
+.section-title.orange { --xo-accent: var(--xo-orange); }
+.section-title.purple { --xo-accent: var(--xo-purple); }
+
+/* ===== 通用徽章（五色语义） ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: var(--xo-r-pill);
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.badge-primary { background: rgba(110,199,59,0.12);  color: var(--xo-green-deep); }
+.badge-accent  { background: rgba(69,137,214,0.14);  color: var(--xo-blue); }
+.badge-danger  { background: rgba(255,89,95,0.12);   color: var(--xo-red); }
+.badge-warning { background: rgba(255,143,0,0.14);   color: #cc7200; }
+.badge-purple  { background: rgba(114,78,155,0.14);  color: var(--xo-purple); }
+
+/* ===== 标签（小药丸，用于状态） ===== */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 18rpx;
+  border-radius: var(--xo-r-pill);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.pill-green  { background: rgba(110,199,59,0.14);  color: var(--xo-green-deep); }
+.pill-blue   { background: rgba(69,137,214,0.14);  color: var(--xo-blue); }
+.pill-red    { background: rgba(255,89,95,0.14);   color: var(--xo-red); }
+.pill-orange { background: rgba(255,143,0,0.14);   color: #cc7200; }
+.pill-purple { background: rgba(114,78,155,0.14);  color: var(--xo-purple); }
+.pill-gray   { background: rgba(51,51,51,0.06);    color: var(--xo-ink-3); }
+
+/* ===== Hero 区（品牌渐变 + 装饰光斑，营造层次） ===== */
+.xo-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(155deg, #4a9c2a 0%, var(--xo-green) 45%, var(--xo-green-light) 100%);
+  color: #fff;
+}
+.xo-hero::before,
+.xo-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%);
+  pointer-events: none;
+}
+.xo-hero::before { width: 360rpx; height: 360rpx; top: -120rpx; right: -80rpx; }
+.xo-hero::after  { width: 260rpx; height: 260rpx; bottom: -120rpx; left: -60rpx; }
+
+/* 深色 hero（用于金额/成功页，避免死板纯黑，改用品牌墨绿混色） */
+.xo-hero-dark {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, #2a3326 0%, #1f2a1c 55%, #2f3d28 100%);
+  color: #fff;
+}
+.xo-hero-dark::before {
+  content: "";
+  position: absolute;
+  width: 420rpx; height: 420rpx;
+  top: -160rpx; right: -120rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(110,199,59,0.25) 0%, rgba(110,199,59,0) 70%);
+  pointer-events: none;
+}
+
+/* ===== 进度条 ===== */
+.bar-track {
+  height: 16rpx;
+  background: var(--xo-line);
+  border-radius: var(--xo-r-pill);
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: var(--xo-r-pill);
+  background: linear-gradient(90deg, var(--xo-green), var(--xo-green-light));
+  transition: width 0.6s ease;
+}

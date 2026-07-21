@@ -1,0 +1,110 @@
+<!--subpackages/order-list/list.wxml — 订单中心（微信规范）-->
+<view class="page">
+  <!-- 顶部分类：对齐微信订单列表 Tab -->
+  <view class="tabs">
+    <view
+      class="tab {{activeTab === item.key ? 'on' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="key"
+      data-key="{{item.key}}"
+      bindtap="onTabTap"
+    >
+      <text class="tab-text">{{item.label}}</text>
+      <view class="tab-badge" wx:if="{{item.key === 'todo' && todoCount > 0}}">{{todoCount > 99 ? '99+' : todoCount}}</view>
+    </view>
+  </view>
+
+  <view class="body" wx:if="{{!loading}}">
+    <block wx:if="{{!isEmpty}}">
+      <view
+        class="order"
+        wx:for="{{displayOrders}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="onOrderTap"
+        hover-class="order-hover"
+        hover-stay-time="100"
+      >
+        <view class="order-hd">
+          <text class="order-no">订单号 {{item.orderNo}}</text>
+          <text class="order-st" style="color: {{item.statusColor}};">{{item.statusText}}</text>
+        </view>
+
+        <view class="order-bd">
+          <text class="order-stage">{{item.stageLabel}}</text>
+          <view class="order-amt">
+            <text class="amt-label">已付</text>
+            <text class="amt-num">¥{{item.paidY}}</text>
+          </view>
+          <view class="order-next" wx:if="{{item.nextY}}">
+            <text>待付 ¥{{item.nextY}}</text>
+            <text class="order-cd" wx:if="{{item.countdownText}}">{{item.countdownText}}</text>
+          </view>
+          <text class="order-todo" wx:elif="{{item.todoText}}">{{item.todoText}}</text>
+        </view>
+
+        <view class="order-ft" catchtap="noop">
+          <view
+            class="btn-plain"
+            catchtap="onCopyOrderNo"
+            data-no="{{item.orderNo}}"
+            hover-class="btn-hover"
+          >复制单号</view>
+          <view
+            wx:if="{{item.canRefund}}"
+            class="btn-plain"
+            catchtap="onActionTap"
+            data-id="{{item.id}}"
+            data-type="refund"
+            hover-class="btn-hover"
+          >申请退款</view>
+          <view
+            wx:if="{{item.isVoucher}}"
+            class="btn-main"
+            catchtap="onActionTap"
+            data-id="{{item.id}}"
+            data-type="voucher"
+            hover-class="btn-main-hover"
+          >查看代金券</view>
+          <view
+            wx:elif="{{item.canPayFinal}}"
+            class="btn-main"
+            catchtap="onActionTap"
+            data-id="{{item.id}}"
+            data-type="final"
+            hover-class="btn-main-hover"
+          >支付尾款</view>
+          <view
+            wx:elif="{{item.canSupplement || item.canConfirmContinue}}"
+            class="btn-main"
+            catchtap="onActionTap"
+            data-id="{{item.id}}"
+            data-type="detail"
+            hover-class="btn-main-hover"
+          >去处理</view>
+          <view
+            wx:else
+            class="btn-plain"
+            catchtap="onOrderTap"
+            data-id="{{item.id}}"
+            hover-class="btn-hover"
+          >查看详情</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:else>
+      <text class="empty-t">{{emptyTitle}}</text>
+      <text class="empty-d" wx:if="{{emptyDesc}}">{{emptyDesc}}</text>
+      <view
+        class="btn-main empty-btn"
+        wx:if="{{showEmptyCta}}"
+        bindtap="onTapPreorder"
+        hover-class="btn-main-hover"
+      >去预定</view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+</view>

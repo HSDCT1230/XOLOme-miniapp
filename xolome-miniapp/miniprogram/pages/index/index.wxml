@@ -1,0 +1,146 @@
+<!--pages/index/index.wxml — 首页（层次强化）-->
+<view class="page-index">
+  <!-- Hero：全幅轮播 · 品牌压底 -->
+  <view class="hero">
+    <swiper
+      class="hero-swiper"
+      autoplay
+      circular
+      interval="4200"
+      duration="600"
+      current="{{heroIndex}}"
+      bindchange="onHeroChange"
+    >
+      <swiper-item wx:for="{{heroBanners}}" wx:key="*this">
+        <image class="hero-bg" src="{{item}}" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
+    <view class="hero-vignette"></view>
+    <view class="hero-fade"></view>
+    <view class="hero-content">
+      <image class="logo-img" src="/images/brand/logo-w.png" mode="aspectFit" />
+      <view class="product-subtitle">让喜欢的内容,成为你的桌面伙伴</view>
+      <view class="product-desc">IP角色 · 宠物 · 家人 · 游戏角色，通过全息AI在桌面陪伴你</view>
+      <view class="hero-dots">
+        <view
+          class="hero-dot {{heroIndex === index ? 'hero-dot-on' : ''}}"
+          wx:for="{{heroBanners}}"
+          wx:key="*this"
+        ></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 限量：压在 hero 下沿的深色条 -->
+  <view class="stock-band">
+    <view class="stock-band-inner">
+      <view class="stock-meta">
+        <text class="stock-kicker">LIMITED</text>
+        <text class="stock-label">限量首发 {{stockTotal}} 套</text>
+      </view>
+      <text class="stock-count"><text class="stock-num">{{stockRemaining}}</text> 剩余</text>
+    </view>
+    <view class="stock-track">
+      <view class="stock-fill" style="width: {{stockPercent}}%;"></view>
+    </view>
+    <view class="stock-sold">已售 {{stockPercent}}%</view>
+  </view>
+
+  <!-- 服务入口：订单 / 个人 并列 -->
+  <view class="service-panel service-panel-row">
+    <view class="service-cell" bindtap="onTapOrderCenter" hover-class="service-hover" hover-stay-time="100">
+      <text class="service-title">订单中心</text>
+      <text class="service-value" wx:if="{{myLatestOrder}}">{{myLatestOrder.stageHint}}</text>
+      <text class="service-value" wx:else>暂无订单</text>
+    </view>
+    <view class="service-divider"></view>
+    <view class="service-cell" bindtap="onTapUserCenter" hover-class="service-hover" hover-stay-time="100">
+      <text class="service-title">个人中心</text>
+      <text class="service-value">地址 · 客服</text>
+    </view>
+  </view>
+
+  <!-- DIY 体验 -->
+  <view class="diy-entry diy-entry-top" bindtap="onTapDiy">
+    <view class="diy-copy">
+      <text class="diy-kicker">DIY 体验</text>
+      <text class="diy-title">上传照片，生成 AI 动画</text>
+      <text class="diy-desc">把专属内容投放到全息仓，马上试一试</text>
+    </view>
+    <view class="diy-btn">立即体验</view>
+  </view>
+
+  <!-- 核心体验（图文） -->
+  <view class="block block-features">
+    <view class="block-head">
+      <view class="block-kicker">EXPERIENCE</view>
+      <view class="block-title">核心体验</view>
+      <view class="block-sub">内容进入桌面，陪伴成为日常</view>
+    </view>
+    <view class="feature-list">
+      <view class="feature-card" wx:for="{{coreEntries}}" wx:key="title">
+        <view class="feature-media">
+          <image class="feature-img" src="{{item.image}}" mode="aspectFill" lazy-load />
+          <view class="feature-media-fade"></view>
+          <text class="feature-index">0{{index + 1}}</text>
+        </view>
+        <view class="feature-body">
+          <view class="feature-head">
+            <text class="feature-name">{{item.title}}</text>
+            <text class="feature-tag" wx:if="{{item.tag}}">{{item.tag}}</text>
+          </view>
+          <view class="feature-desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联名：深色区块 -->
+  <view class="collab-band">
+    <view class="block-head block-head-light">
+      <view class="block-kicker">COLLAB</view>
+      <view class="block-title">联名系列</view>
+      <view class="block-sub">XOLOme × IP，把角色装进桌面</view>
+    </view>
+    <view class="poster-list">
+      <image
+        class="poster"
+        wx:for="{{collabPosters}}"
+        wx:key="*this"
+        src="{{item}}"
+        mode="widthFix"
+        lazy-load
+      />
+    </view>
+
+    <!-- 展台实景 · 横滑卡片 -->
+    <view class="showcase-head">
+      <text class="showcase-title">联名展台</text>
+    </view>
+    <scroll-view class="showcase-scroll" scroll-x enhanced show-scrollbar="{{false}}" enable-flex>
+      <view class="showcase-track">
+        <view class="showcase-card" wx:for="{{collabShowcases}}" wx:key="id">
+          <image class="showcase-img" src="{{item.image}}" mode="aspectFill" lazy-load />
+          <view class="showcase-meta">
+            <text class="showcase-name">{{item.title}}</text>
+            <text class="showcase-partner">{{item.partner}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="bottom-space"></view>
+
+  <!-- CTA -->
+  <view class="cta-bar">
+    <view class="cta cta-ghost" bindtap="onTapSurvey">
+      <text class="cta-main">先填问卷</text>
+      <text class="cta-sub">问卷送 ¥500 代金券</text>
+    </view>
+    <view class="cta cta-solid" bindtap="onTapPreorder">
+      <text class="cta-main">直接预定</text>
+      <text class="cta-sub">¥499 锁定体验资格</text>
+    </view>
+  </view>
+</view>

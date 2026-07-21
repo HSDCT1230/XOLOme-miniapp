@@ -1,0 +1,339 @@
+/* subpackages/final-payment/payment.wxss — 尾款支付 */
+
+.page-payment {
+  min-height: 100vh;
+  background: var(--xo-canvas);
+  padding-bottom: 200rpx;
+}
+
+/* === 尾款金额展示 === */
+.amount-hero {
+  background: var(--xo-ink);
+  padding: 64rpx 32rpx 56rpx;
+  text-align: center;
+}
+
+.hero-tag {
+  display: inline-block;
+  padding: 6rpx 24rpx;
+  background: rgba(110,199,59,0.25);
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  color: #8fdf5a;
+  font-weight: 600;
+}
+
+.hero-amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin: 28rpx 0 16rpx;
+}
+
+.hero-symbol {
+  font-size: 44rpx;
+  color: #fff;
+  font-weight: 700;
+  margin-right: 6rpx;
+}
+
+.hero-value {
+  font-size: 88rpx;
+  color: #fff;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -2rpx;
+}
+
+.hero-order {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.5);
+  margin-top: 8rpx;
+  font-family: -apple-system, monospace;
+}
+
+/* === 通用 section === */
+.section {
+  margin: 24rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 20rpx;
+  padding-left: 0;
+  border-left: none;
+}
+
+/* === 金额明细 === */
+.amount-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  border: 1rpx solid var(--xo-line);
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 0;
+}
+
+.amount-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.amount-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount-retail {
+  color: #bbb;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.amount-saved {
+  color: #6ec73b;
+  font-weight: 600;
+}
+
+.amount-divider {
+  height: 1rpx;
+  background: var(--xo-line);
+  margin: 16rpx 0;
+}
+
+.amount-final-row {
+  padding-top: 8rpx;
+}
+
+.amount-final-label {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+.amount-final-value {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: #ff595f;
+  font-variant-numeric: tabular-nums;
+}
+
+/* === 支付方式 === */
+.method-list {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx 32rpx;
+  border: 1rpx solid var(--xo-line);
+}
+
+.method-item {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 0;
+  border-bottom: 1rpx solid var(--xo-line-2);
+}
+
+.method-item:last-child {
+  border-bottom: none;
+}
+
+.method-disabled {
+  opacity: 0.45;
+}
+
+.method-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: var(--xo-canvas);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.method-info {
+  flex: 1;
+}
+
+.method-name {
+  font-size: 30rpx;
+  color: #333333;
+  font-weight: 600;
+}
+
+.method-desc {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.method-check {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.method-check-on {
+  background: #6ec73b;
+  border-color: #6ec73b;
+}
+
+/* === 温馨提示 === */
+.tips-card {
+  margin: 24rpx;
+  padding: 28rpx 32rpx;
+  background: rgba(69,137,214,0.08);
+  border-radius: 16rpx;
+  border-left: 6rpx solid #4589d6;
+}
+
+.tips-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #4589d6;
+  margin-bottom: 12rpx;
+}
+
+.tips-item {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.8;
+}
+
+/* === 底部支付栏 === */
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.06);
+  z-index: 10;
+}
+
+.bottom-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bottom-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.bottom-amount {
+  display: flex;
+  align-items: baseline;
+}
+
+.bottom-symbol {
+  font-size: 26rpx;
+  color: #ff595f;
+  font-weight: 700;
+  margin-right: 2rpx;
+}
+
+.bottom-value {
+  font-size: 44rpx;
+  color: #ff595f;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.pay-btn {
+  padding: 0 64rpx;
+  height: 88rpx;
+  border-radius: 44rpx;
+  background: linear-gradient(135deg, #6ec73b 0%, #8fdf5a 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(110,199,59,0.3);
+  margin-left: 24rpx;
+}
+
+.pay-btn:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.pay-btn-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* === 支付成功 === */
+.success-hero {
+  background: var(--xo-ink);
+  padding: 100rpx 32rpx 80rpx;
+  text-align: center;
+}
+
+.success-icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6ec73b 0%, #4589d6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 72rpx;
+  font-weight: 700;
+  margin: 0 auto 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(110,199,59,0.4);
+}
+
+.success-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.success-sub {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.6);
+  margin-top: 12rpx;
+}
+
+.success-amount {
+  font-size: 64rpx;
+  font-weight: 800;
+  color: #4589d6;
+  margin-top: 32rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.success-actions {
+  padding: 48rpx 24rpx;
+}

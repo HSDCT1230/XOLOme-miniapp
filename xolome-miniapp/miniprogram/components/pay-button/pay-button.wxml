@@ -1,0 +1,12 @@
+<view
+  class="pay-button {{disabled ? 'is-disabled' : ''}} {{loading ? 'is-loading' : ''}}"
+  bindtap="onTap"
+>
+  <view wx:if="{{loading}}" class="pay-loading-spinner"></view>
+  <view class="pay-content">
+    <text class="pay-label">{{typeLabels[type]}}</text>
+    <text class="pay-amount">
+      <text class="pay-amount-symbol">¥</text>{{amountStr}}
+    </text>
+  </view>
+</view>

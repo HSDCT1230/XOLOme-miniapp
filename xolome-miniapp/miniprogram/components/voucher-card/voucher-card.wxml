@@ -1,0 +1,30 @@
+<view class="voucher-card" bindtap="onTap">
+  <!-- 状态水印 -->
+  <view wx:if="{{voucher.status}}" class="voucher-watermark">{{voucher.status}}</view>
+
+  <!-- 左侧：面额 -->
+  <view class="voucher-left">
+    <view class="amount-row">
+      <text class="amount-symbol">¥</text>
+      <text class="amount-value">{{voucher.amount}}</text>
+    </view>
+    <text class="amount-desc">代金券</text>
+  </view>
+
+  <!-- 中间：圆孔虚线分隔 -->
+  <view class="voucher-separator">
+    <view class="notch notch-top"></view>
+    <view class="dashed-line"></view>
+    <view class="notch notch-bottom"></view>
+  </view>
+
+  <!-- 右侧：信息 -->
+  <view class="voucher-right">
+    <view wx:if="{{voucher.source}}" class="source-tag">{{voucher.source}}</view>
+    <view wx:if="{{voucher.validUntil}}" class="validity-row">
+      <text class="validity-label">有效期至</text>
+      <text class="validity-date">{{voucher.validUntil}}</text>
+    </view>
+    <view wx:if="{{voucher.desc}}" class="voucher-desc">{{voucher.desc}}</view>
+  </view>
+</view>

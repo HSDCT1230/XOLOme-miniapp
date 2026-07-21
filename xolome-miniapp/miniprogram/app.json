@@ -1,0 +1,26 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/survey/survey",
+    "pages/preorder/preorder",
+    "pages/order-detail/order-detail",
+    "pages/webview/webview"
+  ],
+  "subPackages": [
+    { "root": "subpackages/order-list", "pages": ["list"] },
+    { "root": "subpackages/refund", "pages": ["refund"] },
+    { "root": "subpackages/final-payment", "pages": ["payment"] },
+    { "root": "subpackages/voucher", "pages": ["voucher"] },
+    { "root": "subpackages/user-center", "pages": ["center"] }
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#6ec73b",
+    "navigationBarTitleText": "XOLOme X1",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f4f7f5",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
