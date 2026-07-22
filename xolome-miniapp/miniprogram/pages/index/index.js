@@ -1,7 +1,10 @@
-// pages/index/index.js — 首页
+﻿// pages/index/index.js — 首页
 const MOCK = require('../../utils/mock-data');
 const config = require('../../utils/config');
 const { buildOrderSummary } = require('../../utils/order-summary');
+
+// 大图走 CDN，避免代码包体积与「单资源≤200K」质量扫描问题
+const asset = (path) => `${config.ASSET_CDN}${path}`;
 
 Page({
   data: {
@@ -11,32 +14,32 @@ Page({
     hasSurvey: false,
     myLatestOrder: null,
     heroBanners: [
-      '/images/hero/hero-1.png',
-      '/images/hero/hero-2.png',
-      '/images/hero/hero.png',
+      asset('/images/hero/hero-1.jpg'),
+      asset('/images/hero/hero-2.jpg'),
+      asset('/images/hero/hero.jpg'),
     ],
     heroIndex: 0,
     collabPosters: [
-      '/images/collab/poster-1.jpg',
+      asset('/images/collab/poster-1.jpg'),
     ],
     collabShowcases: [
       {
         id: 'panda',
         title: 'Panda 联名',
         partner: 'XOLO me × Panda',
-        image: '/images/collab/showcase-panda.jpg',
+        image: asset('/images/collab/showcase-panda.jpg'),
       },
       {
         id: 'mecha',
         title: '长安卫联名',
         partner: 'XOLO me × CHANG AN WEI',
-        image: '/images/collab/showcase-mecha.jpg',
+        image: asset('/images/collab/showcase-mecha.jpg'),
       },
       {
         id: 'heart56',
         title: '民族娃娃',
         partner: 'XOLO me × 民族娃娃',
-        image: '/images/collab/showcase-56.jpg',
+        image: asset('/images/collab/showcase-56.jpg'),
       },
     ],
     // 三大核心入口（按"内容→陪伴"逻辑排序）
@@ -45,19 +48,19 @@ Page({
         title: 'IP全息伙伴',
         desc: '喜欢的动漫、游戏、影视角色，以裸眼3D出现在桌面陪伴你',
         tag: '内容',
-        image: '/images/feature/feature-1.png',
+        image: asset('/images/feature/feature-1.jpg'),
       },
       {
         title: '全息相册',
         desc: '上传宠物、家人或朋友影像，AI 生成动画并投放全息仓',
         tag: '创造',
-        image: '/images/feature/feature-2.png',
+        image: asset('/images/feature/feature-2.jpg'),
       },
       {
         title: '游戏生态陪伴',
         desc: '游戏角色进入 XOLOme，随进度互动并给出情绪反馈',
         tag: '游戏',
-        image: '/images/feature/feature-3.png',
+        image: asset('/images/feature/feature-3.jpg'),
       },
     ],
   },

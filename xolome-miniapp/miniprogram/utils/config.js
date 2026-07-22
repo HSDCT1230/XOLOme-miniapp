@@ -37,6 +37,10 @@ const config = {
   // ---- DIY 体验（上传照片 → AI 动画 → 全息仓） ----
   DIY_URL: 'https://api.xolome.com',
 
+  // ---- 静态资源 CDN（大图不进代码包，见微信「图片≤200K」建议）----
+  // 真机需在公众平台配置 downloadFile 合法域名：xolome-miniapp.pages.dev
+  ASSET_CDN: 'https://xolome-miniapp.pages.dev',
+
   // ---- 云开发（正式环境） ----
   cloudEnv: '',
 };
