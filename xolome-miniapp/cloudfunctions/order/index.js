@@ -9,10 +9,10 @@
  *   action=ship:    发货 FINAL_PAID → SHIPPED（管理员动作，生产需鉴权保护）
  *
  * 金额单位：分
- *   意向金  ¥499  = 49900
- *   补足金  ¥1,000= 100000（补至¥1,499）
- *   尾款    ¥3,000= 300000
- *   合计    ¥4,499 = 449900
+ *   体验资格 ¥499  = 49900
+ *   补款     ¥1,000= 100000（补至¥1,499）
+ *   尾款     ¥3,000= 300000
+ *   合计     ¥4,499 = 449900
  */
 const cloud = require('wx-server-sdk')
 
@@ -21,11 +21,23 @@ const db = cloud.database()
 const _ = db.command
 
 // 金额常量（单位：分）
-const DEPOSIT_AMOUNT = 49900        // ¥499 意向金
+const DEPOSIT_AMOUNT = 49900        // ¥499 体验资格
 const CONFIRMATION_AMOUNT = 100000   // ¥1,000 补足金（补至¥1,499）
 const FINAL_AMOUNT = 300000          // ¥3,000 尾款
 const TOTAL_AMOUNT = 449900          // ¥4,499 总计
 const MAX_STOCK = 3000               // 最大库存数量
+
+// 真实占库状态（DEPOSIT_PAID 成功起占用，至 SHIPPED；退款/转券/过期释放）
+const STOCK_OCCUPYING = [
+  'DEPOSIT_PAID', 'DEPOSIT_GRACE', 'DEPOSIT_CONFIRMED', 'CONFIRMED_GRACE',
+  'LOCKED', 'FINAL_PAID', 'SHIPPED'
+]
+
+// 一人一有效单：以下终态允许再建新单（含转券，否则 voucher.use 死锁）
+const TERMINAL_FOR_CREATE = [
+  'CANCELLED', 'REFUNDED', 'EXPIRED', 'VOUCHER_USED',
+  'DEPOSIT_VOUCHER', 'CONFIRMED_VOUCHER', 'SHIPPED'
+]
 
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext()
@@ -34,11 +46,11 @@ exports.main = async (event, context) => {
   try {
     if (action === 'create') {
       // ========== 创建订单 ==========
-      // 1. 校验库存：统计所有未取消订单数量
+      // 1. 校验库存：仅统计真实占位状态（退款/转券已释放）
       // 注意：count→add 非原子，极端并发下存在超卖风险。
       //       生产环境应改用独立库存计数器文档 + _.inc(-1) 原子扣减做兜底。
       const countResult = await db.collection('orders')
-        .where({ status: _.neq('CANCELLED') })
+        .where({ status: _.in(STOCK_OCCUPYING) })
         .count()
 
       if (countResult.total >= MAX_STOCK) {
@@ -73,7 +85,7 @@ exports.main = async (event, context) => {
           const existing = await transaction.collection('orders')
             .where({
               userId: OPENID,
-              status: _.nin(['CANCELLED', 'REFUNDED', 'EXPIRED', 'VOUCHER_USED'])
+              status: _.nin(TERMINAL_FOR_CREATE)
             })
             .get()
 

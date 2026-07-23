@@ -50,11 +50,20 @@ function insertOne(key, item) {
 
 // ==================== 库存 ====================
 
+// 真实占库：付 499 成功起占用；退款/转券/过期/券已用释放（与云函数 order 一致）
+const STOCK_OCCUPYING = [
+  ORDER_STATUS.DEPOSIT_PAID,
+  ORDER_STATUS.DEPOSIT_GRACE,
+  ORDER_STATUS.DEPOSIT_CONFIRMED,
+  ORDER_STATUS.CONFIRMED_GRACE,
+  ORDER_STATUS.LOCKED,
+  ORDER_STATUS.FINAL_PAID,
+  ORDER_STATUS.SHIPPED,
+];
+
 function getStockRemaining() {
   const orders = getAll('orders');
-  const reserved = orders.filter(o =>
-    ![ORDER_STATUS.CANCELLED, ORDER_STATUS.REFUNDED, ORDER_STATUS.EXPIRED].includes(o.status)
-  ).length;
+  const reserved = orders.filter((o) => STOCK_OCCUPYING.includes(o.status)).length;
   return Math.max(0, config.STOCK_TOTAL - reserved);
 }
 
@@ -72,25 +81,73 @@ function updateUser(updates) {
 
 // ==================== 问卷 ====================
 
+function pickAnswer(data, key) {
+  if (!data) return undefined;
+  if (data[key] !== undefined) return data[key];
+  return data[String(key)];
+}
+
+/** 与 cloudfunctions/survey flattenAnswers 对齐（题号 1–19 + 11 分支） */
+function flattenSurveyAnswers(data) {
+  const raw = data || {};
+  return {
+    age: pickAnswer(raw, 1) || null,
+    gender: pickAnswer(raw, 2) || null,
+    digitalBudget: pickAnswer(raw, 3) || null,
+    purchaseHistory: pickAnswer(raw, 4) || null,
+    firstImpression: pickAnswer(raw, 5) || null,
+    firstImpressionNote: pickAnswer(raw, '5a') || '',
+    compareCategory: pickAnswer(raw, 6) || null,
+    scenarios: pickAnswer(raw, 7) || [],
+    deskTime: pickAnswer(raw, 8) || null,
+    coreInterests: pickAnswer(raw, 9) || [],
+    topFeature: pickAnswer(raw, 10) || null,
+    ipEcosystemInterest: pickAnswer(raw, 11) || null,
+    ipFocusPreference: pickAnswer(raw, '11a') || null,
+    addonPriceAccept: pickAnswer(raw, '11b') || null,
+    wishIp: pickAnswer(raw, '11c') || '',
+    ipShellPremium: pickAnswer(raw, '11d') || null,
+    // v17：11e 已并入 11b；仅写 addonPriceAccept，ipMerchPayCap 固定 null 保留字段兼容
+    // v18：Q12 preferredDeskScene 选项改为家庭+工位扁平单选（无大类分支）
+    // v19：Q11 兴趣题去多桶（外壳/数字拆到 11a）；11a–11d 仅 very_interested/interested 可见
+    // v20：Q9 none_attractive 隐藏 Q10/分支；Q10 可 none_first；Q13/Q15 去乐观前提；14a 增观望原因
+    // v21：Q12 增 not_want；14a 合并 unproven→want_reviews；文案微调（无 flatten 结构变更）
+    // topFeature 可为 null / none_first；priceRange 可含 not_consider
+    ipMerchPayCap: null,
+    albumUse: pickAnswer(raw, '11ha') || null,
+    albumConcern: pickAnswer(raw, '11hb') || null,
+    aiUse: pickAnswer(raw, '11ai') || null,
+    aiProactive: pickAnswer(raw, '11ab') || null,
+    gameScene: pickAnswer(raw, '11gc') || null,
+    gamePriority: pickAnswer(raw, '11gb') || null,
+    entertainmentContent: pickAnswer(raw, '11he') || null,
+    entertainmentSource: pickAnswer(raw, '11hb2') || null,
+    preferredDeskScene: pickAnswer(raw, 12) || null,
+    priceRange: pickAnswer(raw, 13) || null,
+    participation: pickAnswer(raw, 14) || null,
+    barriers: pickAnswer(raw, '14a') || [],
+    barrierNote: pickAnswer(raw, '14b') || '',
+    buyTiming: pickAnswer(raw, 15) || null,
+    otherSuggest: pickAnswer(raw, 16) || '',
+    channels: pickAnswer(raw, 17) || [],
+    displayName: pickAnswer(raw, 18) || '',
+    contact: pickAnswer(raw, 19) || '',
+  };
+}
+
 function submitSurvey(data) {
   const user = getUser();
-  // V2.1:抽取关键运营字段
+  const flat = flattenSurveyAnswers(data);
   const survey = insertOne('surveys', {
     userId: user.id,
-    ...data,
-    // 第一眼产品认知（Q11答案）
-    firstImpression: data[11] || null,
-    // 核心兴趣（Q3答案数组）
-    coreInterests: data[3] || [],
-    // 购买兴趣（Q4答案数组）
-    purchaseInterests: data[4] || [],
-    // 参与意愿（Q6答案）
-    participation: data[6] || null,
+    data,
+    ...flat,
+    version: 'v21',
   });
   // 生成代金券码并持久化，供个人中心展示
   const couponCode = 'XOL5' + Math.random().toString(36).slice(2, 10).toUpperCase();
   const saved = updateOne('surveys', survey.id, { couponCode });
-  return { ...(saved || survey), couponCode };
+  return { ...(saved || survey), couponCode, alreadySubmitted: false };
 }
 
 function getMySurvey() {
@@ -165,10 +222,26 @@ function getInterestStats() {
 
 // ==================== 订单 ====================
 
+// 一人一有效单：转券/已退/已取消/已发货等终态允许再建（避免转券后无法用券死锁）
+const TERMINAL_FOR_CREATE = [
+  ORDER_STATUS.CANCELLED,
+  ORDER_STATUS.REFUNDED,
+  ORDER_STATUS.EXPIRED,
+  ORDER_STATUS.VOUCHER_USED,
+  ORDER_STATUS.DEPOSIT_VOUCHER,
+  ORDER_STATUS.CONFIRMED_VOUCHER,
+  ORDER_STATUS.SHIPPED,
+];
+
 function createOrder(data = {}) {
   const user = getUser();
   const stock = getStockRemaining();
   if (stock <= 0) throw new Error('库存不足');
+
+  const active = findAll('orders', (o) =>
+    o.userId === user.id && !TERMINAL_FOR_CREATE.includes(o.status)
+  );
+  if (active.length > 0) throw new Error('您已有有效订单，请先完成或取消当前订单');
 
   const order = insertOne('orders', {
     userId: user.id,

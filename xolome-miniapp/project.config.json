@@ -2,12 +2,30 @@
   "description": "XOLOme X1 首发预定 · 模拟验证版",
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "node_modules" },
-      { "type": "folder", "value": ".workbuddy" },
-      { "type": "folder", "value": "__MACOSX" },
-      { "type": "file", "value": ".DS_Store" },
-      { "type": "suffix", "value": ".md" },
-      { "type": "suffix", "value": ".map" }
+      {
+        "value": "node_modules",
+        "type": "folder"
+      },
+      {
+        "value": ".workbuddy",
+        "type": "folder"
+      },
+      {
+        "value": "__MACOSX",
+        "type": "folder"
+      },
+      {
+        "value": ".DS_Store",
+        "type": "file"
+      },
+      {
+        "value": ".md",
+        "type": "suffix"
+      },
+      {
+        "value": ".map",
+        "type": "suffix"
+      }
     ],
     "include": []
   },
@@ -46,8 +64,8 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.3.4",
-  "appid": "wxf939daecdafaf18b",
+  "libVersion": "3.17.0",
+  "appid": "wxffabef26186fbe67",
   "projectname": "xolome-x1",
   "cloudfunctionRoot": "cloudfunctions/",
   "miniprogramRoot": "miniprogram/",

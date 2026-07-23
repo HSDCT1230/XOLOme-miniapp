@@ -6,6 +6,10 @@ __MACOSX/
 
 # 微信开发者工具本机配置
 xolome-miniapp/project.private.config.json
+project.private.config.json
+
+# Cloudflare / Wrangler 本地缓存
+.wrangler/
 
 # 云函数依赖（部署时再 npm install）
 xolome-miniapp/cloudfunctions/*/node_modules/
@@ -20,3 +24,6 @@ xolome-miniapp/cloudfunctions/*/node_modules/
 *.log
 *.tmp
 .cache/
+
+# 供应商交付包（本地生成）
+dist/

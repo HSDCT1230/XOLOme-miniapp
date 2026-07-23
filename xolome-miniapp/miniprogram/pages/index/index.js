@@ -1,7 +1,8 @@
-﻿// pages/index/index.js — 首页
+// pages/index/index.js — 首页
 const MOCK = require('../../utils/mock-data');
 const config = require('../../utils/config');
 const { buildOrderSummary } = require('../../utils/order-summary');
+const surveyService = require('../../utils/survey-service');
 
 // 大图走 CDN，避免代码包体积与「单资源≤200K」质量扫描问题
 const asset = (path) => `${config.ASSET_CDN}${path}`;
@@ -77,12 +78,18 @@ Page({
     this.setData({ heroIndex: e.detail.current });
   },
 
-  refreshData() {
-    const remaining = MOCK.getStockRemaining();
+  async refreshData() {
+    const remaining = config.isMock ? MOCK.getStockRemaining() : config.STOCK_TOTAL;
     const percent = Math.round(((config.STOCK_TOTAL - remaining) / config.STOCK_TOTAL) * 100);
 
-    const survey = MOCK.getMySurvey();
-    const orders = MOCK.getMyOrders();
+    let survey = null;
+    try {
+      survey = await surveyService.getMySurvey();
+    } catch (e) {
+      console.warn('getMySurvey', e);
+    }
+
+    const orders = config.isMock ? MOCK.getMyOrders() : [];
     const latest = orders.length > 0 ? orders[0] : null;
     let stageHint = '';
     if (latest) {

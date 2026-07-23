@@ -2,6 +2,10 @@
 
 > 模拟验证版 · 符合微信小程序标准目录结构
 
+仓库根：`D:\cursoe_code\XOLOme-Miniapp` · GitHub：https://github.com/HSDCT1230/XOLOme-miniapp  
+本目录绝对路径：`D:\cursoe_code\XOLOme-Miniapp\xolome-miniapp`  
+废弃：`E:\Xolome微信小程序\`（勿用）
+
 ## 目录结构
 
 ```
@@ -39,8 +43,8 @@ xolome-miniapp/                 ← 用微信开发者工具打开本目录
 ## 导入项目
 
 1. 打开微信开发者工具 → 导入项目  
-2. 目录选择：`xolome-miniapp/`  
-3. AppID：可留空（测试号）或使用 `project.config.json` 中的 AppID  
+2. 目录选择：`D:\cursoe_code\XOLOme-Miniapp\xolome-miniapp`  
+3. AppID：使用 `project.config.json` 中的 AppID，或测试号  
 4. 编译预览
 
 ## 模拟 / 正式

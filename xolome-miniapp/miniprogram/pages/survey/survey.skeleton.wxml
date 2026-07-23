@@ -1,0 +1,73 @@
+<!--
+此文件为开发者工具生成，生成时间: 2026/7/23下午3:33:11
+使用方法：
+在 D:\cursoe_code\XOLOme-Miniapp\xolome-miniapp\miniprogram\pages\survey\survey.wxml 引入模板
+
+```
+<import src="survey.skeleton.wxml"/>
+<template is="skeleton" wx:if="{{loading}}" />
+```
+
+在 D:\cursoe_code\XOLOme-Miniapp\xolome-miniapp\miniprogram\pages\survey\survey.wxss 中引入样式
+```
+@import "./survey.skeleton.wxss";
+```
+
+更多详细信息可以参考文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/skeleton.html
+-->
+<template name="skeleton">
+  <view class="sk-container">
+    <view class="page-survey">
+      <view class="progress-bar-wrap">
+        <view class="survey-banner sk-transparent sk-text-18-7500-529 sk-text">约 2–4 分钟 · 提交后发 ¥500 券</view>
+        <view class="progress-info">
+          <text class="progress-step sk-transparent sk-text-18-7500-774 sk-text">17 / 22</text>
+          <text class="progress-percent sk-transparent sk-text-18-7500-188 sk-text">77%</text>
+        </view>
+        <view class="progress-track">
+          <view class="progress-fill sk-image" style="width: 77%;"></view>
+        </view>
+      </view>
+      <view class="question-area">
+        <view class="question-card">
+          <view class="question-title">
+            <text class="q-index sk-transparent sk-text-18-7500-883 sk-text">13</text>
+            <text class="q-text sk-transparent sk-text-14-2857-872 sk-text">如果首发内容刚好是你期待的，哪个整机价位会让你更愿意认真考虑？</text>
+            <text class="q-required sk-transparent sk-opacity">*</text>
+          </view>
+          <view class="q-hint sk-transparent sk-text-16-6667-533 sk-text">指整机心理价，不含后续周边；区间含下限、不含上限</view>
+          <view class="options">
+            <view class="option-item" data-qid="13" data-type="radio" data-value="under_3000">
+              <view class="option-mark radio"></view>
+              <text class="option-label sk-transparent sk-text-16-6667-862 sk-text">不到 ¥3,000</text>
+            </view>
+            <view class="option-item" data-qid="13" data-type="radio" data-value="3000_5000">
+              <view class="option-mark radio"></view>
+              <text class="option-label sk-transparent sk-text-16-6667-288 sk-text">¥3,000 – 5,000</text>
+            </view>
+            <view class="option-item" data-qid="13" data-type="radio" data-value="5000_8000">
+              <view class="option-mark radio"></view>
+              <text class="option-label sk-transparent sk-text-16-6667-994 sk-text">¥5,000 – 8,000</text>
+            </view>
+            <view class="option-item" data-qid="13" data-type="radio" data-value="over_8000">
+              <view class="option-mark radio"></view>
+              <text class="option-label sk-transparent sk-text-16-6667-137 sk-text">¥8,000 及以上</text>
+            </view>
+            <view class="option-item" data-qid="13" data-type="radio" data-value="unsure">
+              <view class="option-mark radio"></view>
+              <text class="option-label sk-transparent sk-text-16-6667-366 sk-text">暂时不好说</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="action-bar">
+        <view class="btn btn-outline btn-prev sk-transparent sk-text-0-0000-63 sk-text">
+          上一题
+        </view>
+        <view class="btn btn-primary btn-next sk-transparent sk-image">
+          下一题
+        </view>
+      </view>
+    </view>
+  </view>
+</template>

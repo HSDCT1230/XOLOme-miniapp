@@ -2,7 +2,10 @@
 
 ## 项目概述
 - 微信小程序：XOLOme X1 首发预定（市场调研 + 预定流程）
-- 项目路径：xolome-miniapp/
+- 本机仓库：`D:\cursoe_code\XOLOme-Miniapp`
+- GitHub：https://github.com/HSDCT1230/XOLOme-miniapp
+- 小程序工程：`xolome-miniapp/`（开发者工具打开此层）
+- 废弃路径：`E:\Xolome微信小程序\`（勿用）
 - 当前版本：V2.1（用户认知路径重构版）
 
 ## 核心业务规则（不变）
@@ -31,7 +34,7 @@
 - utils/state-machine.js — 14状态流转 + 倒计时
 - utils/mock-data.js — 模拟数据 CRUD + 统计
 - utils/config.js — 金额/时间配置
-- outputs/XOLOme_X1_PRD.md — 完整PRD文档
+- docs/XOLOme_X1_PRD.md — 完整PRD文档
 
 ## 开发原则
 - 后端状态机 + 金额永远不变

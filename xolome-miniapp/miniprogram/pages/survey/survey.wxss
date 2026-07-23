@@ -16,6 +16,14 @@
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 
+.survey-banner {
+  margin-bottom: 16rpx;
+  font-size: 24rpx;
+  color: #6ec73b;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+
 .progress-info {
   display: flex;
   justify-content: space-between;
@@ -63,7 +71,15 @@
 .question-title {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 32rpx;
+  margin-bottom: 16rpx;
+}
+
+.q-hint {
+  margin: 0 0 28rpx;
+  padding: 0 4rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #8a8a8a;
 }
 
 .q-index {
@@ -99,7 +115,7 @@
 }
 
 /* === 选项 === */
-radio-group, checkbox-group {
+.options {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
@@ -112,7 +128,6 @@ radio-group, checkbox-group {
   background: #fff;
   border: 2rpx solid var(--xo-line);
   border-radius: 14rpx;
-  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .option-item:active {
@@ -126,6 +141,44 @@ radio-group, checkbox-group {
 
 .option-item.option-active .option-label {
   color: var(--xo-green-deep);
+  font-weight: 700;
+}
+
+.option-mark {
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
+  border: 2rpx solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.option-mark.radio {
+  border-radius: 50%;
+}
+
+.option-mark.check {
+  border-radius: 8rpx;
+}
+
+.option-mark.on {
+  border-color: var(--xo-green);
+  background: var(--xo-green);
+}
+
+.radio-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.check-icon {
+  color: #fff;
+  font-size: 22rpx;
+  line-height: 1;
   font-weight: 700;
 }
 

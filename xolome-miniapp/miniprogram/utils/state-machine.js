@@ -27,7 +27,7 @@ function canRefund(order) {
   return refundableStates.includes(order.status) && now < graceDeadline;
 }
 
-// ---- 判断是否可以补足意向金（¥499 → ¥1,499） ----
+// ---- 判断是否可以补款确认购买（¥499 → ¥1,499） ----
 function canSupplement(order) {
   const refundableStates = [ORDER_STATUS.DEPOSIT_PAID, ORDER_STATUS.DEPOSIT_GRACE];
   return refundableStates.includes(order.status);
@@ -82,7 +82,8 @@ function calcOrderStage(order) {
     case ORDER_STATUS.DEPOSIT_PAID:
       return {
         ...base, stageIndex: 0,
-        canRefund: now < refundDeadline,
+        // 与 canRefund() 一致：宽限截止前均可原路退；倒计时展示指向 refundDeadline（体验资格有效期）
+        canRefund: !!graceDeadline && now < graceDeadline,
         canSupplement: true,
         countdown: refundDeadline,
         countdownLabel: '体验资格有效期',  // V2.1:不再显示"退款窗口倒计时"
@@ -122,7 +123,8 @@ function calcOrderStage(order) {
     case ORDER_STATUS.DEPOSIT_CONFIRMED:
       return {
         ...base, stageIndex: 1,
-        canRefund: now < refundDeadline,
+        // 与 canRefund() 一致：宽限截止前均可原路退；倒计时展示指向 refundDeadline
+        canRefund: !!graceDeadline && now < graceDeadline,
         canConfirmContinue: true,
         countdown: refundDeadline,
         countdownLabel: '确认购买有效期',  // V2.1:不显示"犹豫期"

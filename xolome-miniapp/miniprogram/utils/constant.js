@@ -76,23 +76,24 @@ const VOUCHER_STATUS = {
   EXPIRED: 'EXPIRED',
 };
 
-// ---- 通知场景 ----
+// ---- 通知场景（与 notification TEMPLATE_MAP / payment / scheduler 统一） ----
 const NOTIFY_SCENE = {
-  DEPOSIT_PAID:           'DEPOSIT_PAID',            // 意向金支付成功
-  DEPOSIT_WARNING:        'DEPOSIT_WARNING',         // 提前3天预警
-  DEPOSIT_GRACE_START:    'DEPOSIT_GRACE_START',     // 进入宽限期
-  DEPOSIT_GRACE_DAILY:    'DEPOSIT_GRACE_DAILY',     // 宽限期每日提醒
-  DEPOSIT_TO_VOUCHER:     'DEPOSIT_TO_VOUCHER',      // 转代金券
-  CONFIRMED_PAID:         'CONFIRMED_PAID',           // 补足成功
-  CONFIRMED_WARNING:      'CONFIRMED_WARNING',        // 提前3天预警
-  CONFIRMED_GRACE_START:  'CONFIRMED_GRACE_START',    // 进入宽限期
-  CONFIRMED_GRACE_DAILY:  'CONFIRMED_GRACE_DAILY',    // 宽限期每日提醒
-  CONFIRMED_TO_VOUCHER:   'CONFIRMED_TO_VOUCHER',     // 转代金券
-  FINAL_PAID:             'FINAL_PAID',               // 尾款支付成功
-  SHIPPED:                'SHIPPED',                  // 已发货
-  VOUCHER_WARNING_35:     'VOUCHER_WARNING_35',       // 代金券35天预警
-  VOUCHER_WARNING_5:      'VOUCHER_WARNING_5',        // 代金券5天预警
-  VOUCHER_EXPIRED:        'VOUCHER_EXPIRED',          // 代金券过期
+  DEPOSIT_SUCCESS:              'DEPOSIT_SUCCESS',              // 体验资格支付成功
+  DEPOSIT_DEADLINE_WARNING:     'DEPOSIT_DEADLINE_WARNING',     // 提前3天预警
+  DEPOSIT_GRACE_START:          'DEPOSIT_GRACE_START',          // 进入即将调整
+  DEPOSIT_GRACE_DAILY:          'DEPOSIT_GRACE_DAILY',          // 每日提醒
+  DEPOSIT_VOUCHER:              'DEPOSIT_VOUCHER',              // 转代金券
+  CONFIRMATION_SUCCESS:         'CONFIRMATION_SUCCESS',         // 补款成功
+  CONFIRMATION_DEADLINE_WARNING:'CONFIRMATION_DEADLINE_WARNING',// 提前3天预警
+  CONFIRMATION_GRACE_START:     'CONFIRMATION_GRACE_START',     // 进入即将调整
+  CONFIRMATION_GRACE_DAILY:     'CONFIRMATION_GRACE_DAILY',     // 每日提醒
+  CONFIRMATION_VOUCHER:         'CONFIRMATION_VOUCHER',         // 转代金券
+  FINAL_SUCCESS:                'FINAL_SUCCESS',                // 尾款支付成功
+  ORDER_LOCKED:                 'ORDER_LOCKED',                 // 订单已锁定
+  REFUND_SUCCESS:               'REFUND_SUCCESS',               // 退款成功
+  SHIPPED:                      'SHIPPED',                      // 已发货
+  VOUCHER_EXPIRE_WARNING_35:    'VOUCHER_EXPIRE_WARNING_35',    // 代金券35天预警
+  VOUCHER_EXPIRE_WARNING_5:     'VOUCHER_EXPIRE_WARNING_5',     // 代金券5天预警
 };
 
 // ---- 第一眼产品认知（V2.1:用于融资BP和市场分析） ----
@@ -112,6 +113,11 @@ const CORE_INTEREST = {
   game_companion:         { value: 'game_companion',         label: '游戏陪伴' },
   ai_assistant:           { value: 'ai_assistant',           label: 'AI私人伙伴' },
   hologram_entertainment: { value: 'hologram_entertainment', label: '全息娱乐' },
+  role_switch:            { value: 'role_switch',            label: '多角色切换' },
+  // 原版 Q4 购买兴趣选项
+  ip_ai:                  { value: 'ip_ai',                  label: 'IP角色成为AI伙伴' },
+  pet_family:             { value: 'pet_family',             label: '宠物/家人全息陪伴' },
+  life_assistant:         { value: 'life_assistant',         label: 'AI生活办公助手' },
 };
 
 // ---- 状态流转规则 ----

@@ -50,10 +50,10 @@
 - ✅ 项目结构完整：68 个文件，4 页面 + 5 分包 + 5 组件 + 4 工具模块
 
 ### 交付文档
-- `outputs/XOLOme_X1_PRD.md` — V2.1 完整 PRD
-- `outputs/微信官方申请流程指南.md`
-- `outputs/模拟验证指南.md`
-- `outputs/XOLOme_X1_小程序架构方案.md`
+- `docs/XOLOme_X1_PRD.md` — V2.1 完整 PRD
+- `docs/微信官方申请流程指南.md`
+- `docs/模拟验证指南.md`
+- 仓库：`D:\cursoe_code\XOLOme-Miniapp` · GitHub：https://github.com/HSDCT1230/XOLOme-miniapp
 
 ## 设计原则
 > **后端不变，用户端变。** 状态机、金额、状态码保持原样；所有用户可见文案统一为 V2.1 体验优先表述。

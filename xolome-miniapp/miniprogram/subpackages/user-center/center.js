@@ -7,6 +7,8 @@
 const MOCK = require('../../utils/mock-data');
 const { VOUCHER_STATUS } = require('../../utils/constant');
 const { buildOrderSummary, sortSummaries } = require('../../utils/order-summary');
+const surveyService = require('../../utils/survey-service');
+const config = require('../../utils/config');
 
 function formatDate(iso) {
   if (!iso) return '-';
@@ -54,11 +56,17 @@ Page({
     this.refresh();
   },
 
-  refresh() {
-    const user = MOCK.getUser() || {};
-    const orders = MOCK.getMyOrders() || [];
-    const vouchers = MOCK.getMyVouchers() || [];
-    const survey = MOCK.getMySurvey();
+  async refresh() {
+    const user = (config.isMock ? MOCK.getUser() : wx.getStorageSync('user')) || {};
+    const orders = config.isMock ? MOCK.getMyOrders() || [] : [];
+    const vouchers = config.isMock ? MOCK.getMyVouchers() || [] : [];
+
+    let survey = null;
+    try {
+      survey = await surveyService.getMySurvey();
+    } catch (e) {
+      console.warn('getMySurvey', e);
+    }
 
     const summaries = sortSummaries(orders.map((o) => buildOrderSummary(o)).filter(Boolean));
     const ongoing = summaries.filter((o) => !o.isTerminal);

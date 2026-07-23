@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XOLOme 付费流程图预览</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      flowchart: { htmlLabels: true, curve: "basis" }
+    });
+  </script>
+  <style>
+    body { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; margin: 24px; background: #f7f7f5; color: #1a1a1a; }
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.1rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 0.35rem; }
+    p.hint { color: #666; font-size: 0.9rem; }
+    .diagram { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>XOLOme X1 · 付费流程图预览</h1>
+  <p class="hint">用浏览器打开本文件即可渲染。逻辑与 <code>上线需求说明书.md</code> §3 一致。</p>
+
+  <h2>3.2 总状态机</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+stateDiagram-v2
+  [*] --> PENDING_DEPOSIT: 创建订单
+  PENDING_DEPOSIT --> DEPOSIT_PAID: 付499成功
+  PENDING_DEPOSIT --> CANCELLED: 取消未支付
+  DEPOSIT_PAID --> DEPOSIT_CONFIRMED: 补款1000成功
+  DEPOSIT_PAID --> REFUNDED: 窗口或宽限内退款
+  DEPOSIT_PAID --> DEPOSIT_GRACE: 超60天由调度触发
+  DEPOSIT_GRACE --> DEPOSIT_CONFIRMED: 宽限内仍可补款
+  DEPOSIT_GRACE --> REFUNDED: 宽限内退款
+  DEPOSIT_GRACE --> DEPOSIT_VOUCHER: 宽限到期转499券
+  DEPOSIT_CONFIRMED --> LOCKED: 确认锁定
+  DEPOSIT_CONFIRMED --> REFUNDED: 窗口或宽限内退累计1499
+  DEPOSIT_CONFIRMED --> CONFIRMED_GRACE: 超30天由调度触发
+  CONFIRMED_GRACE --> LOCKED: 宽限内可锁定
+  CONFIRMED_GRACE --> REFUNDED: 宽限内退累计1499
+  CONFIRMED_GRACE --> CONFIRMED_VOUCHER: 宽限到期转1499券
+  LOCKED --> FINAL_PAID: 付尾款3000
+  FINAL_PAID --> SHIPPED: 管理员发货
+  DEPOSIT_VOUCHER --> VOUCHER_USED: 券用于新单
+  CONFIRMED_VOUCHER --> VOUCHER_USED: 券用于新单
+  DEPOSIT_VOUCHER --> EXPIRED: 券过期
+  CONFIRMED_VOUCHER --> EXPIRED: 券过期
+    </pre>
+  </div>
+
+  <h2>3.3 付款流程（499）</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TD
+  A["预定页勾选协议"] --> B["order.create"]
+  B --> C{"库存与一人一有效单"}
+  C -->|"失败"| Z1["提示售罄或已有订单"]
+  C -->|"成功"| D["payment.prepay DEPOSIT"]
+  D --> E["服务端核定 totalFee = max(0, 49900 - voucherAmount)"]
+  E --> F["wx.requestPayment"]
+  F -->|"取消或失败"| G["保持 PENDING_DEPOSIT 可重试"]
+  F -->|"支付成功"| H["payment.callback"]
+  H --> I{"幂等: transactionId 未处理?"}
+  I -->|"已处理"| J["直接返回成功"]
+  I -->|"首次"| K{"状态仍 PENDING_DEPOSIT?"}
+  K -->|"否"| Z2["记异常流水并人工核对"]
+  K -->|"是"| L["订单变为 DEPOSIT_PAID"]
+  L --> M["写 refundDeadline +60d 与 graceDeadline +67d"]
+  M --> N["写 payments 流水含 outTradeNo"]
+  N --> O["扣减库存占位"]
+  O --> P["通知体验资格支付成功"]
+  P --> Q["前端 order.get 刷新 禁止本地写已付"]
+    </pre>
+  </div>
+
+  <h2>3.4 补款流程（1000）</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TD
+  A["订单详情确认购买入口"] --> B{"状态为 DEPOSIT_PAID 或 DEPOSIT_GRACE?"}
+  B -->|"否"| Z1["无入口或拒绝"]
+  B -->|"是"| C["payment.prepay CONFIRMATION"]
+  C --> D["服务端核定 totalFee=100000"]
+  D --> E["wx.requestPayment"]
+  E -->|"取消"| F["保持原状态可重试"]
+  E -->|"成功"| G["payment.callback"]
+  G --> H{"幂等且状态仍允许补款"}
+  H --> I["订单变为 DEPOSIT_CONFIRMED"]
+  I --> J["重置 refundDeadline +30d 与 graceDeadline +37d"]
+  J --> K["写 CONFIRMATION 支付流水"]
+  K --> L["展示确认购买规则与退款入口"]
+    </pre>
+  </div>
+
+  <h2>3.5 尾款流程（3000）</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TD
+  A["订单详情确认继续购买"] --> B{"状态为 DEPOSIT_CONFIRMED 或 CONFIRMED_GRACE?"}
+  B -->|"否"| Z1["无入口或拒绝"]
+  B -->|"是"| C["order.confirm 变为 LOCKED"]
+  C --> D["尾款页支付入口"]
+  D --> E["payment.prepay FINAL"]
+  E --> F["服务端核定 totalFee=300000"]
+  F --> G["wx.requestPayment"]
+  G -->|"取消"| H["保持 LOCKED 可重试"]
+  G -->|"成功"| I["payment.callback"]
+  I --> J{"幂等且状态仍为 LOCKED?"}
+  J -->|"否"| Z2["记异常流水"]
+  J -->|"是"| K["订单变为 FINAL_PAID"]
+  K --> L["写 FINAL 支付流水"]
+  L --> M["通知尾款支付成功待发货"]
+  M --> N["管理员 order.ship 变为 SHIPPED"]
+    </pre>
+  </div>
+
+  <h2>3.6 退款流程</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TD
+  A["用户申请退款"] --> B["refund.apply 仅传 orderId"]
+  B --> C{"归属与状态白名单且 now 小于 graceDeadline 且无进行中退款单"}
+  C -->|"否"| Z1["拒绝并说明原因"]
+  C -->|"是"| D{"当前阶段"}
+  D -->|"体验资格"| E["退 DEPOSIT 499"]
+  D -->|"确认购买"| F["退 DEPOSIT 与 CONFIRMATION 累计 1499 逐笔"]
+  E --> G["cloudPay.refund 写 refunds PROCESSING"]
+  F --> G
+  G --> H["refund.callback 逐笔 SUCCESS"]
+  H --> I{"该单全部退款是否成功"}
+  I -->|"否"| J["保持处理中"]
+  I -->|"是"| K["订单变为 REFUNDED"]
+  K --> L["回补库存"]
+  L --> M["发退款成功通知"]
+    </pre>
+  </div>
+
+  <h2>3.7 超窗转券</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TD
+  S["scheduler 定时建议每5分钟"] --> W{"距 refundDeadline 前3天内?"}
+  W -->|"是且未提醒"| N1["发预警通知 文案即将调整"]
+  W --> G1{"DEPOSIT_PAID 且 refundDeadline 已过?"}
+  G1 -->|"是"| H1["变为 DEPOSIT_GRACE 并通知"]
+  H1 --> D1["每日提醒直至 graceDeadline"]
+  D1 --> V1{"graceDeadline 已过?"}
+  V1 -->|"是"| T1["变为 DEPOSIT_VOUCHER 建499券365天"]
+  G1 --> G2{"DEPOSIT_CONFIRMED 且 refundDeadline 已过?"}
+  G2 -->|"是"| H2["变为 CONFIRMED_GRACE 并通知"]
+  H2 --> D2["每日提醒"]
+  D2 --> V2{"graceDeadline 已过?"}
+  V2 -->|"是"| T2["变为 CONFIRMED_VOUCHER 建1499券365天"]
+  T1 --> R["转券后不可原路退 释放库存并允许新单"]
+  T2 --> R
+    </pre>
+  </div>
+</body>
+</html>
