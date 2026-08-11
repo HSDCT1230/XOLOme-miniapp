@@ -1,0 +1,7 @@
+Figwright 连接说明（简）
+
+1. Figma Desktop 打开「XOLOME DIY Tab Prototype」
+2. Plugins → Development → Figwright → 确认 Connected
+3. 桥接地址：http://127.0.0.1:3055
+
+完整用法见同目录 README.md

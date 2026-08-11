@@ -27,3 +27,5 @@ xolome-miniapp/cloudfunctions/*/node_modules/
 
 # 供应商交付包（本地生成）
 dist/
+
+docs/prototypes/**/node_modules/
