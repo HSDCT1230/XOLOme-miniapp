@@ -7,6 +7,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { encode, decode } from '@msgpack/msgpack';
+import { HUBS, allTemplates, replicaOf, stylizeOf } from '../hub-taxonomy.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 /** Prototype root: …/XOLOME DIY Tab Prototype */
@@ -22,37 +23,14 @@ const DEMO_PLAYS = (AIGC_SPEC.templates.find((t) => t.id === 'tpl_12_clay_dog')?
   (p) => p.name,
 );
 
-/** Chip 顺序（首页筛选）：全部 → 潮玩 → 游戏 → 宠物 → 桌宠 → 真人雕塑 → 真人 */
-const CHIP_ORDER = ['全部', '潮玩', '游戏', '宠物', '桌宠', '真人雕塑', '真人'];
-
-/**
- * 瀑布流顺序（产品指定前 7）：棉花娃娃 → Q版机甲 → 乐高 → 自拍盲盒 → 打工人盲盒 → 学院风BJD → 高定爱豆；其后 RPG/汽水/载具/宠物/桌宠/雕塑。
- * Cover heights sized for FIT full-body product shots (taller = less cramped)
- */
-const TEMPLATES = [
-  { n: '01', name: '棉花娃娃', file: 'tpl-20-yarn-doll.png', cat: '潮玩', h: 236, id: 'tpl_18_yarn_doll' },
-  { n: '02', name: 'Q版机甲', file: 'tpl-17-mecha.png', cat: '游戏', h: 240, id: 'tpl_01_mecha' },
-  { n: '03', name: '乐高角色', file: 'tpl-10-pixel.png', cat: '游戏', h: 228, id: 'tpl_08_pixel' },
-  { n: '04', name: '自拍盲盒', file: 'tpl-05-blindbox.png', cat: '潮玩', h: 228, id: 'tpl_04_selfie_blindbox' },
-  { n: '05', name: '打工人盲盒', file: 'tpl-16-office.png', cat: '潮玩', h: 228, id: 'tpl_05_office_blindbox' },
-  { n: '06', name: 'bjd学院风证件照', file: 'tpl-22-bjd-school-id.png', cat: '潮玩', h: 252, id: 'tpl_20_bjd_school_id' },
-  { n: '07', name: 'bjd高定爱豆', file: 'tpl-21-bjd-idol.png', cat: '潮玩', h: 252, id: 'tpl_19_bjd_idol' },
-  { n: '08', name: 'RPG立绘立体化', file: 'tpl-11-rpg.png', cat: '游戏', h: 252, id: 'tpl_02_rpg' },
-  { n: '09', name: '汽水瓶人偶', file: 'tpl-18-soda.png', cat: '潮玩', h: 236, id: 'tpl_06_soda' },
-  { n: '10', name: '微缩载具', file: 'tpl-12-vehicle.png', cat: '潮玩', h: 220, id: 'tpl_07_vehicle' },
-  { n: '11', name: '粘土小狗', file: 'tpl-03-clay-dog.png', cat: '宠物', h: 228, id: 'tpl_12_clay_dog' },
-  { n: '12', name: '羊毛毡小猫', file: 'tpl-04-felt-cat.png', cat: '宠物', h: 244, id: 'tpl_13_felt_cat' },
-  { n: '13', name: '数字国潮摆件', file: 'tpl-06-guochao.png', cat: '桌宠', h: 236, id: 'tpl_09_guochao' },
-  { n: '14', name: '桌面小精灵', file: 'tpl-07-sprite.png', cat: '桌宠', h: 220, id: 'tpl_10_sprite' },
-  { n: '15', name: '天气精灵', file: 'tpl-08-weather.png', cat: '桌宠', h: 228, id: 'tpl_11_weather' },
-  { n: '16', name: '桌面盆栽', file: 'tpl-09-season.png', cat: '桌宠', h: 212, id: 'tpl_14_plant' },
-  { n: '17', name: '咖啡店打卡', file: 'tpl-19-cafe.png', cat: '真人雕塑', h: 244, id: 'tpl_03_cafe' },
-  { n: '18', name: '立体全家福', file: 'tpl-01-family.png', cat: '真人雕塑', h: 236, id: 'tpl_15_family' },
-  { n: '19', name: '微雕塑婚礼瞬间', file: 'tpl-13-wedding.png', cat: '真人雕塑', h: 236, id: 'tpl_17_wedding' },
-];
+/** Flat list for counts / wiring helpers */
+const TEMPLATES = allTemplates();
+const COL_W = 181;
 
 const C = {
   bg: { r: 0.965, g: 0.968, b: 0.975 },
+  /** 首页暖石灰底，避免死白空洞 */
+  homeBg: { r: 0.965, g: 0.962, b: 0.955 },
   white: { r: 1, g: 1, b: 1 },
   ink: { r: 0.12, g: 0.12, b: 0.14 },
   muted: { r: 0.55, g: 0.56, b: 0.6 },
@@ -60,7 +38,27 @@ const C = {
   soft: { r: 0.94, g: 0.945, b: 0.955 },
   line: { r: 0.9, g: 0.91, b: 0.93 },
   dark: { r: 0.12, g: 0.14, b: 0.13 },
+  /** Cover placeholder before image load */
+  dot: { r: 0.92, g: 0.925, b: 0.935 },
 };
+
+/** Top → bottom linear gradient (Figma affine). */
+async function fillLinearVertical(nodeId, stops) {
+  await rpc('set_fills', {
+    nodeId,
+    fills: [
+      {
+        type: 'GRADIENT_LINEAR',
+        gradientStops: stops,
+        // Rotate default L→R into T→B
+        gradientTransform: [
+          [0, 1, 0],
+          [-1, 0, 1],
+        ],
+      },
+    ],
+  });
+}
 
 async function rpc(toolName, args = {}) {
   const requestId = randomUUID();
@@ -112,6 +110,18 @@ async function size(nodeId, width, height) {
   await rpc('resize_nodes', { nodeIds: [nodeId], width, height });
 }
 
+/** Lock width only; keep/reassert vertical HUG so card content is not crushed to a fixed short height. */
+async function sizeWidthHug(nodeId, width) {
+  const n = await rpc('get_node', { nodeId });
+  const h = Math.max(40, n.node?.height || 120);
+  await rpc('resize_nodes', { nodeIds: [nodeId], width, height: h });
+  await rpc('set_layout_props', {
+    nodeId,
+    layoutSizingHorizontal: 'FIXED',
+    layoutSizingVertical: 'HUG',
+  });
+}
+
 function b64(file) {
   return readFileSync(join(COVER_DIR, file)).toString('base64');
 }
@@ -153,47 +163,48 @@ function pngAspect(file) {
 }
 
 /**
- * Place full subject centered in wrap (no crop):
- * size image rect to file aspect that fits inside wrap, FILL that rect.
+ * Cover the wrap completely (object-fit: cover):
+ * image rect fills wrap (+ slight overscan), scaleMode FILL — no letterbox gaps.
  */
-async function placeFittedImage({ parentId, name, file, wrapW, wrapH }) {
-  const aspect = pngAspect(file);
-  const wrapAspect = wrapW / wrapH;
-  // Near-square assets:
-  // - square wrap → FILL
-  // - portrait wrap → centered square (avoid left/right crop of subject)
-  // - landscape wrap → FILL wrap (video-player style; slight top/bottom crop)
-  if (aspect > 0.85 && aspect < 1.15) {
-    let iw = wrapW;
-    let ih = wrapH;
-    let x = 0;
-    let y = 0;
-    if (wrapAspect < 0.85) {
-      const side = Math.min(wrapW, wrapH);
-      iw = side;
-      ih = side;
-      x = Math.round((wrapW - iw) / 2);
-      y = Math.round((wrapH - ih) / 2);
-    }
-    const img = await rpc('import_image', {
-      data: b64(file),
-      name,
-      parentId,
-      width: iw,
-      height: ih,
-      scaleMode: 'FILL',
-      x,
-      y,
-    });
+async function placeFittedImage({ parentId, name, file, wrapW, wrapH, bleed = 3, bleedBottom }) {
+  // Slight bleed so rounded card corners never reveal wrap fill as a “photo edge”
+  // bleedBottom defaults to bleed; set 0 for hub banners so feet aren't clipped
+  const b = bleed;
+  const bb = bleedBottom === undefined ? bleed : bleedBottom;
+  const iw = Math.max(1, Math.round(wrapW + b * 2));
+  const ih = Math.max(1, Math.round(wrapH + b + bb));
+  const x = -b;
+  const y = -b;
+  const img = await rpc('import_image', {
+    data: b64(file),
+    name,
+    parentId,
+    width: iw,
+    height: ih,
+    scaleMode: 'FILL',
+    x,
+    y,
+  });
+  for (let i = 0; i < 2; i++) {
     await rpc('resize_nodes', { nodeIds: [img.nodeId], width: iw, height: ih });
     await rpc('set_position', { nodeId: img.nodeId, x, y });
-    return img.nodeId;
   }
-  let iw = wrapW;
-  let ih = wrapW / aspect;
-  if (ih > wrapH) {
-    ih = wrapH;
-    iw = wrapH * aspect;
+  return img.nodeId;
+}
+
+/**
+ * Show full subject inside wrap (object-fit: contain) — for 复刻示意图需露全身/全貌.
+ * Inset padding keeps feet/head clear of rounded-corner clipping.
+ */
+async function placeContainImage({ parentId, name, file, wrapW, wrapH, inset = 8 }) {
+  const aspect = imageAspect(file);
+  const maxW = Math.max(1, wrapW - inset * 2);
+  const maxH = Math.max(1, wrapH - inset * 2);
+  let iw = maxW;
+  let ih = maxW / aspect;
+  if (ih > maxH) {
+    ih = maxH;
+    iw = maxH * aspect;
   }
   iw = Math.max(1, Math.round(iw));
   ih = Math.max(1, Math.round(ih));
@@ -209,8 +220,10 @@ async function placeFittedImage({ parentId, name, file, wrapW, wrapH }) {
     x,
     y,
   });
-  await rpc('resize_nodes', { nodeIds: [img.nodeId], width: iw, height: ih });
-  await rpc('set_position', { nodeId: img.nodeId, x, y });
+  for (let i = 0; i < 2; i++) {
+    await rpc('resize_nodes', { nodeIds: [img.nodeId], width: iw, height: ih });
+    await rpc('set_position', { nodeId: img.nodeId, x, y });
+  }
   return img.nodeId;
 }
 
@@ -233,6 +246,27 @@ async function phone(name, index) {
   });
   await size(f.nodeId, 390, 844);
   return f.nodeId;
+}
+
+/** Shared back-to-home control used across upload + mid-flow screens */
+async function makeBackHome(parentId, label = '‹ 首页') {
+  const back = await rpc('create_frame', { name: 'Back/首页', parentId });
+  await rpc('set_fills', { nodeId: back.nodeId, fills: [] });
+  await rpc('set_auto_layout', {
+    nodeId: back.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 4,
+    paddingRight: 8,
+    paddingTop: 8,
+    paddingBottom: 8,
+  });
+  await rpc('set_layout_props', {
+    nodeId: back.nodeId,
+    layoutSizingHorizontal: 'HUG',
+    layoutSizingVertical: 'HUG',
+  });
+  await text(back.nodeId, label, { size: 15, style: 'Medium', color: C.green });
+  return back.nodeId;
 }
 
 async function waitPlugin() {
@@ -262,33 +296,210 @@ async function waitPlugin() {
   throw new Error('plugin not connected — open Figma → Plugins → Figwright → Connected');
 }
 
-async function main() {
-  console.log('Waiting…');
-  await waitPlugin();
+/** Level-1：三大类入口 — 上图下文，图片满铺；文案区精简（无短横线/类目标签） */
+async function createHubCard(parentId, hub, panelH) {
+  const W = 358;
+  const H = panelH;
+  const INFO_H = 58;
+  const MEDIA_H = Math.max(120, H - INFO_H);
 
-  // Clear old top-level frames
-  const doc = await rpc('get_document', {});
-  const old = (doc.children || []).filter((c) => c.type === 'FRAME').map((c) => c.id);
-  if (old.length) await rpc('delete_nodes', { nodeIds: old });
-
-  // ═══════════ 01 首页瀑布流 ═══════════
-  const home = await phone('01 首页·风格模板', 0);
-  const hHead = await rpc('create_frame', { name: 'Header', parentId: home, width: 390 });
-  await fill(hHead.nodeId, C.bg);
+  const diy = await rpc('create_frame', {
+    name: `Hub/${hub.id} ${hub.name}`,
+    parentId,
+    width: W,
+    height: H,
+  });
+  await fill(diy.nodeId, C.white);
+  await rpc('set_corner_radius', { nodeId: diy.nodeId, radius: 18 });
   await rpc('set_auto_layout', {
-    nodeId: hHead.nodeId,
+    nodeId: diy.nodeId,
+    layoutMode: 'VERTICAL',
+    itemSpacing: 0,
+    primaryAxisAlignItems: 'MIN',
+    counterAxisAlignItems: 'MIN',
+  });
+  await rpc('set_layout_props', {
+    nodeId: diy.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'FIXED',
+    clipsContent: true,
+  });
+  await size(diy.nodeId, W, H);
+  await shadow(diy.nodeId, 4, 16, 0.05);
+
+  const cover = await rpc('create_frame', {
+    name: `CoverWrap/Hub/${hub.id}`,
+    parentId: diy.nodeId,
+    width: W,
+    height: MEDIA_H,
+  });
+  // Match hub-banner studio field (~247/255) so any subpixel gap isn't a grey plate edge
+  await fill(cover.nodeId, { r: 0.968, g: 0.968, b: 0.965 });
+  await rpc('set_auto_layout', { nodeId: cover.nodeId, layoutMode: 'NONE' });
+  await rpc('set_layout_props', {
+    nodeId: cover.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'FIXED',
+    clipsContent: true,
+  });
+  await size(cover.nodeId, W, MEDIA_H);
+  // 首页入口：资源已预合成满幅横图（全身含脚 + 棚拍侧填），FILL 满铺；底边不 bleed 以免裁脚
+  await placeFittedImage({
+    parentId: cover.nodeId,
+    name: `Cover/Hub/${hub.id}`,
+    file: hub.cover,
+    wrapW: W,
+    wrapH: MEDIA_H,
+    bleedBottom: 0,
+  });
+
+  const info = await rpc('create_frame', {
+    name: 'HubInfo',
+    parentId: diy.nodeId,
+    height: INFO_H,
+  });
+  await fill(info.nodeId, { r: 0.97, g: 0.985, b: 0.96 });
+  await rpc('set_auto_layout', {
+    nodeId: info.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 14,
+    paddingRight: 12,
+    paddingTop: 10,
+    paddingBottom: 10,
+    itemSpacing: 10,
+    primaryAxisAlignItems: 'SPACE_BETWEEN',
+    counterAxisAlignItems: 'CENTER',
+  });
+  await rpc('set_layout_props', {
+    nodeId: info.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'FIXED',
+  });
+  await size(info.nodeId, W, INFO_H);
+
+  const left = await rpc('create_frame', { name: 'HubText', parentId: info.nodeId });
+  await rpc('set_fills', { nodeId: left.nodeId, fills: [] });
+  await rpc('set_auto_layout', {
+    nodeId: left.nodeId,
+    layoutMode: 'VERTICAL',
+    itemSpacing: 2,
+    primaryAxisAlignItems: 'MIN',
+    counterAxisAlignItems: 'MIN',
+  });
+  await rpc('set_layout_props', {
+    nodeId: left.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+  });
+
+  // 精简：去掉「短横线 + 真人/宠物/玩具」类目标签行
+  await text(left.nodeId, hub.name, { size: 16, style: 'Bold' });
+  {
+    const sub = await text(left.nodeId, hub.blurb, { size: 11, color: C.muted });
+    try {
+      await rpc('set_layout_props', {
+        nodeId: sub,
+        layoutSizingHorizontal: 'FILL',
+        layoutSizingVertical: 'HUG',
+      });
+      await rpc('set_text_properties', { nodeId: sub, textAutoResize: 'HEIGHT' });
+    } catch {
+      /* optional */
+    }
+  }
+
+  const cta = await rpc('create_frame', {
+    name: `CTA/Hub/${hub.id}`,
+    parentId: info.nodeId,
+    height: 30,
+  });
+  await fill(cta.nodeId, C.white);
+  await rpc('set_strokes', {
+    nodeId: cta.nodeId,
+    strokes: [{ type: 'SOLID', color: C.green, opacity: 0.55 }],
+    strokeWeight: 1,
+    strokeAlign: 'INSIDE',
+  });
+  await rpc('set_corner_radius', { nodeId: cta.nodeId, radius: 15 });
+  await rpc('set_auto_layout', {
+    nodeId: cta.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 12,
+    paddingRight: 12,
+    primaryAxisAlignItems: 'CENTER',
+    counterAxisAlignItems: 'CENTER',
+  });
+  await rpc('set_layout_props', {
+    nodeId: cta.nodeId,
+    layoutSizingHorizontal: 'HUG',
+    layoutSizingVertical: 'FIXED',
+  });
+  await size(cta.nodeId, 84, 30);
+  await text(cta.nodeId, hub.cta || '玩一下', { size: 12, style: 'Bold', color: C.green });
+
+  return diy.nodeId;
+}
+
+
+/** Level-2：首位突出「复刻」+ 下方变身风格瀑布流 */
+async function buildHubWaterfallPage(hub, index) {
+  const replica = replicaOf(hub);
+  const styles = stylizeOf(hub);
+  const page = await phone(`01${hub.id === 'person' ? 'a' : hub.id === 'pet' ? 'b' : 'c'} ${hub.name}·风格`, index);
+  const nav = await rpc('create_frame', { name: 'Nav', parentId: page, height: 48 });
+  await fill(nav.nodeId, C.bg);
+  await rpc('set_auto_layout', {
+    nodeId: nav.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 16,
+    paddingRight: 16,
+    primaryAxisAlignItems: 'SPACE_BETWEEN',
+    counterAxisAlignItems: 'CENTER',
+  });
+  await rpc('set_layout_props', {
+    nodeId: nav.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'FIXED',
+  });
+  await size(nav.nodeId, 390, 48);
+  const back = await rpc('create_frame', { name: 'Back/首页', parentId: nav.nodeId });
+  await rpc('set_fills', { nodeId: back.nodeId, fills: [] });
+  await rpc('set_auto_layout', {
+    nodeId: back.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 4,
+    paddingRight: 8,
+    paddingTop: 8,
+    paddingBottom: 8,
+  });
+  await rpc('set_layout_props', {
+    nodeId: back.nodeId,
+    layoutSizingHorizontal: 'HUG',
+    layoutSizingVertical: 'HUG',
+  });
+  await text(back.nodeId, '‹ 首页', { size: 15, style: 'Medium', color: C.green });
+  await text(nav.nodeId, hub.tag, { size: 15, style: 'Semi Bold' });
+
+  const head = await rpc('create_frame', { name: 'Header', parentId: page, width: 390 });
+  await fill(head.nodeId, C.bg);
+  await rpc('set_auto_layout', {
+    nodeId: head.nodeId,
     layoutMode: 'VERTICAL',
     paddingLeft: 20,
     paddingRight: 20,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 8,
-    itemSpacing: 8,
+    itemSpacing: 4,
   });
-  await rpc('set_layout_props', { nodeId: hHead.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
-  await text(hHead.nodeId, '开始创作', { size: 28, style: 'Bold' });
-  await text(hHead.nodeId, '上传真人照片，或选风格模板投放全息舱', { size: 13, color: C.muted });
+  await rpc('set_layout_props', {
+    nodeId: head.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+  });
+  await text(head.nodeId, hub.name, { size: 22, style: 'Bold' });
+  await text(head.nodeId, '快来试玩魔法变身术吧', { size: 12, color: C.muted });
 
-  const body = await rpc('create_frame', { name: 'Body', parentId: home, width: 390 });
+  const body = await rpc('create_frame', { name: 'Body', parentId: page, width: 390 });
   await fill(body.nodeId, C.bg);
   await rpc('set_auto_layout', {
     nodeId: body.nodeId,
@@ -296,8 +507,8 @@ async function main() {
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop: 4,
-    paddingBottom: 16,
-    itemSpacing: 10,
+    paddingBottom: 28,
+    itemSpacing: 12,
   });
   await rpc('set_layout_props', {
     nodeId: body.nodeId,
@@ -306,201 +517,159 @@ async function main() {
     layoutAlign: 'STRETCH',
   });
 
-  const cats = await rpc('create_frame', { name: 'Categories', parentId: body.nodeId });
-  await fill(cats.nodeId, C.bg);
+  // ── 突出的复刻入口（二级页第一位）──
+  const feat = await rpc('create_frame', {
+    name: `Replica/${hub.id} ${replica.name}`,
+    parentId: body.nodeId,
+    width: 370,
+  });
+  await fill(feat.nodeId, { r: 0.96, g: 0.985, b: 0.95 });
+  await rpc('set_corner_radius', { nodeId: feat.nodeId, radius: 18 });
+  await rpc('set_strokes', {
+    nodeId: feat.nodeId,
+    strokes: [{ type: 'SOLID', color: C.green, opacity: 0.6 }],
+    strokeWeight: 1.5,
+    strokeAlign: 'INSIDE',
+  });
+  await shadow(feat.nodeId, 4, 16, 0.08);
   await rpc('set_auto_layout', {
-    nodeId: cats.nodeId,
+    nodeId: feat.nodeId,
     layoutMode: 'HORIZONTAL',
-    itemSpacing: 6,
+    paddingLeft: 12,
+    paddingRight: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
+    itemSpacing: 14,
     counterAxisAlignItems: 'CENTER',
-    layoutWrap: 'NO_WRAP',
   });
   await rpc('set_layout_props', {
-    nodeId: cats.nodeId,
+    nodeId: feat.nodeId,
     layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+  });
+
+  const rCover = await rpc('create_frame', {
+    name: `CoverWrap/Replica/${hub.id}`,
+    parentId: feat.nodeId,
+    width: 112,
+    height: 168,
+  });
+  await fill(rCover.nodeId, C.white);
+  await rpc('set_corner_radius', { nodeId: rCover.nodeId, radius: 14 });
+  await rpc('set_auto_layout', { nodeId: rCover.nodeId, layoutMode: 'NONE' });
+  await rpc('set_layout_props', {
+    nodeId: rCover.nodeId,
+    layoutSizingHorizontal: 'FIXED',
     layoutSizingVertical: 'FIXED',
     clipsContent: true,
-    overflowDirection: 'HORIZONTAL',
   });
-  await size(cats.nodeId, 370, 36);
-  for (const [label, on] of CHIP_ORDER.map((label, i) => [label, i === 0])) {
-    const chip = await rpc('create_frame', { name: `Chip/${label}`, parentId: cats.nodeId });
-    await fill(chip.nodeId, on ? C.green : C.white);
-    await rpc('set_corner_radius', { nodeId: chip.nodeId, radius: 18 });
-    if (!on) await shadow(chip.nodeId, 2, 10, 0.05);
-    await rpc('set_auto_layout', {
-      nodeId: chip.nodeId,
-      layoutMode: 'HORIZONTAL',
-      paddingLeft: 10,
-      paddingRight: 10,
-      paddingTop: 6,
-      paddingBottom: 6,
-      primaryAxisAlignItems: 'CENTER',
-      counterAxisAlignItems: 'CENTER',
-    });
-    await rpc('set_layout_props', {
-      nodeId: chip.nodeId,
-      layoutSizingHorizontal: 'HUG',
-      layoutSizingVertical: 'HUG',
-    });
-    await text(chip.nodeId, label, {
-      size: 12,
-      style: on ? 'Semi Bold' : 'Medium',
-      color: on ? C.white : C.ink,
-    });
-  }
+  await size(rCover.nodeId, 112, 168);
+  // 复刻示意图：contain 保证全身/全貌（脚）可见
+  await placeContainImage({
+    parentId: rCover.nodeId,
+    name: `Cover/Replica/${hub.id}`,
+    file: replica.file,
+    wrapW: 112,
+    wrapH: 168,
+    inset: 4,
+  });
+  const rBadge = await rpc('create_frame', { name: 'Badge/复刻', parentId: rCover.nodeId });
+  await fill(rBadge.nodeId, C.green);
+  await rpc('set_corner_radius', { nodeId: rBadge.nodeId, radius: 8 });
+  await rpc('set_auto_layout', {
+    nodeId: rBadge.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 8,
+    paddingRight: 8,
+    paddingTop: 3,
+    paddingBottom: 3,
+  });
+  await rpc('set_layout_props', {
+    nodeId: rBadge.nodeId,
+    layoutSizingHorizontal: 'HUG',
+    layoutSizingVertical: 'HUG',
+  });
+  await text(rBadge.nodeId, '复刻', { size: 10, style: 'Semi Bold', color: C.white });
+  await rpc('set_position', { nodeId: rBadge.nodeId, x: 8, y: 8 });
 
-  // 真人全息动态：通栏入口（无加号）。预览图 + 文案 + 上传 CTA 一体
+  const rInfo = await rpc('create_frame', { name: 'ReplicaInfo', parentId: feat.nodeId });
+  await rpc('set_fills', { nodeId: rInfo.nodeId, fills: [] });
+  await rpc('set_auto_layout', {
+    nodeId: rInfo.nodeId,
+    layoutMode: 'VERTICAL',
+    itemSpacing: 8,
+  });
+  await rpc('set_layout_props', {
+    nodeId: rInfo.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+  });
+  // 页头保留「XX全息动态」；复刻大卡：真人用「原比例全息动态」，其余仍用 hub.name
+  await text(rInfo.nodeId, hub.id === 'person' ? '原比例全息动态' : hub.name, {
+    size: 20,
+    style: 'Bold',
+  });
   {
-    const diy = await rpc('create_frame', {
-      name: 'Card/00 真人全息动态',
-      parentId: body.nodeId,
-      width: 370,
+    const sub = await text(rInfo.nodeId, hub.replicaBlurb || '白底轻轻落一影，原模原样还是你，先不玩变身哦', {
+      size: 12,
+      color: C.muted,
     });
-    await fill(diy.nodeId, { r: 0.96, g: 0.985, b: 0.95 });
-    await rpc('set_corner_radius', { nodeId: diy.nodeId, radius: 18 });
-    await rpc('set_strokes', {
-      nodeId: diy.nodeId,
-      strokes: [{ type: 'SOLID', color: C.green, opacity: 0.55 }],
-      strokeWeight: 1.5,
-      strokeAlign: 'INSIDE',
-    });
-    await shadow(diy.nodeId, 3, 14, 0.06);
-    await rpc('set_auto_layout', {
-      nodeId: diy.nodeId,
-      layoutMode: 'HORIZONTAL',
-      paddingLeft: 12,
-      paddingRight: 14,
-      paddingTop: 12,
-      paddingBottom: 12,
-      itemSpacing: 14,
-      counterAxisAlignItems: 'CENTER',
-    });
-    await rpc('set_layout_props', {
-      nodeId: diy.nodeId,
-      layoutSizingHorizontal: 'FILL',
-      layoutSizingVertical: 'HUG',
-    });
-
-    const cover = await rpc('create_frame', {
-      name: 'CoverWrap/00',
-      parentId: diy.nodeId,
-      width: 92,
-      height: 120,
-    });
-    await fill(cover.nodeId, C.white);
-    await rpc('set_corner_radius', { nodeId: cover.nodeId, radius: 14 });
-    await rpc('set_auto_layout', { nodeId: cover.nodeId, layoutMode: 'NONE' });
-    await rpc('set_layout_props', {
-      nodeId: cover.nodeId,
-      layoutSizingHorizontal: 'FIXED',
-      layoutSizingVertical: 'FIXED',
-      clipsContent: true,
-    });
-    await size(cover.nodeId, 92, 120);
-    await placeFittedImage({
-      parentId: cover.nodeId,
-      name: 'Cover/00',
-      file: 'diy-realtime-person-clean.png',
-      wrapW: 92,
-      wrapH: 120,
-    });
-
-    const info = await rpc('create_frame', { name: 'DiyInfo', parentId: diy.nodeId });
-    await rpc('set_fills', { nodeId: info.nodeId, fills: [] });
-    await rpc('set_auto_layout', {
-      nodeId: info.nodeId,
-      layoutMode: 'VERTICAL',
-      itemSpacing: 8,
-      primaryAxisAlignItems: 'MIN',
-      counterAxisAlignItems: 'MIN',
-    });
-    await rpc('set_layout_props', {
-      nodeId: info.nodeId,
-      layoutSizingHorizontal: 'FILL',
-      layoutSizingVertical: 'HUG',
-    });
-
-    const tagRow = await rpc('create_frame', { name: 'TagRow', parentId: info.nodeId });
-    await rpc('set_fills', { nodeId: tagRow.nodeId, fills: [] });
-    await rpc('set_auto_layout', {
-      nodeId: tagRow.nodeId,
-      layoutMode: 'HORIZONTAL',
-      itemSpacing: 6,
-      counterAxisAlignItems: 'CENTER',
-    });
-    await rpc('set_layout_props', {
-      nodeId: tagRow.nodeId,
-      layoutSizingHorizontal: 'FILL',
-      layoutSizingVertical: 'HUG',
-    });
-    const tag = await rpc('create_frame', { name: 'Tag/真人', parentId: tagRow.nodeId });
-    await fill(tag.nodeId, C.green);
-    await rpc('set_corner_radius', { nodeId: tag.nodeId, radius: 8 });
-    await rpc('set_auto_layout', {
-      nodeId: tag.nodeId,
-      layoutMode: 'HORIZONTAL',
-      paddingLeft: 8,
-      paddingRight: 8,
-      paddingTop: 3,
-      paddingBottom: 3,
-      primaryAxisAlignItems: 'CENTER',
-      counterAxisAlignItems: 'CENTER',
-    });
-    await rpc('set_layout_props', {
-      nodeId: tag.nodeId,
-      layoutSizingHorizontal: 'HUG',
-      layoutSizingVertical: 'HUG',
-    });
-    await text(tag.nodeId, '真人', { size: 10, style: 'Semi Bold', color: C.white });
-    await text(tagRow.nodeId, '一键变成动态', { size: 11, color: C.muted });
-
-    await text(info.nodeId, '真人全息动态', { size: 17, style: 'Bold' });
-    {
-      const sub = await text(info.nodeId, '上传清晰真人照片，生成可投放全息舱的短动态', {
-        size: 12,
-        color: C.muted,
-      });
+    try {
       await rpc('set_layout_props', {
         nodeId: sub,
         layoutSizingHorizontal: 'FILL',
         layoutSizingVertical: 'HUG',
       });
       await rpc('set_text_properties', { nodeId: sub, textAutoResize: 'HEIGHT' });
+    } catch {
+      /* optional */
     }
-
-    const cta = await rpc('create_frame', { name: 'CTA/上传照片', parentId: info.nodeId, height: 34 });
-    await fill(cta.nodeId, C.green);
-    await rpc('set_corner_radius', { nodeId: cta.nodeId, radius: 17 });
-    await rpc('set_auto_layout', {
-      nodeId: cta.nodeId,
-      layoutMode: 'HORIZONTAL',
-      paddingLeft: 14,
-      paddingRight: 14,
-      itemSpacing: 6,
-      primaryAxisAlignItems: 'CENTER',
-      counterAxisAlignItems: 'CENTER',
-    });
-    await rpc('set_layout_props', {
-      nodeId: cta.nodeId,
-      layoutSizingHorizontal: 'HUG',
-      layoutSizingVertical: 'FIXED',
-    });
-    await size(cta.nodeId, 120, 34);
-    await text(cta.nodeId, '上传照片', { size: 13, style: 'Semi Bold', color: C.white });
   }
+  const rCta = await rpc('create_frame', {
+    name: `CTA/Replica/${hub.id}`,
+    parentId: rInfo.nodeId,
+    height: 32,
+  });
+  await fill(rCta.nodeId, C.white);
+  await rpc('set_strokes', {
+    nodeId: rCta.nodeId,
+    strokes: [{ type: 'SOLID', color: C.green, opacity: 0.5 }],
+    strokeWeight: 1,
+    strokeAlign: 'INSIDE',
+  });
+  await rpc('set_corner_radius', { nodeId: rCta.nodeId, radius: 16 });
+  await rpc('set_auto_layout', {
+    nodeId: rCta.nodeId,
+    layoutMode: 'HORIZONTAL',
+    paddingLeft: 14,
+    paddingRight: 14,
+    primaryAxisAlignItems: 'CENTER',
+    counterAxisAlignItems: 'CENTER',
+  });
+  await rpc('set_layout_props', {
+    nodeId: rCta.nodeId,
+    layoutSizingHorizontal: 'HUG',
+    layoutSizingVertical: 'FIXED',
+  });
+  await size(rCta.nodeId, 96, 32);
+  await text(rCta.nodeId, '立即复刻', { size: 13, style: 'Medium', color: C.green });
 
+  // ── 变身风格瀑布流 ──
   const sec = await rpc('create_frame', { name: 'Section', parentId: body.nodeId });
   await fill(sec.nodeId, C.bg);
   await rpc('set_auto_layout', {
     nodeId: sec.nodeId,
     layoutMode: 'HORIZONTAL',
-    primaryAxisAlignItems: 'SPACE_BETWEEN',
+    primaryAxisAlignItems: 'MIN',
     counterAxisAlignItems: 'CENTER',
   });
-  await rpc('set_layout_props', { nodeId: sec.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
-  await text(sec.nodeId, '风格模板', { size: 18, style: 'Bold' });
-  await text(sec.nodeId, `${TEMPLATES.length} 个`, { size: 13, style: 'Medium', color: C.green });
+  await rpc('set_layout_props', {
+    nodeId: sec.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+  });
+  await text(sec.nodeId, '变身风格', { size: 18, style: 'Bold' });
+  // 不展示模板数量 / 箭头
 
   const grid = await rpc('create_frame', { name: 'Waterfall', parentId: body.nodeId });
   await fill(grid.nodeId, C.bg);
@@ -509,17 +678,13 @@ async function main() {
     layoutMode: 'HORIZONTAL',
     itemSpacing: 8,
     counterAxisAlignItems: 'MIN',
-    paddingLeft: 0,
-    paddingRight: 0,
-    paddingBottom: 0,
   });
   await rpc('set_layout_props', {
     nodeId: grid.nodeId,
     layoutSizingHorizontal: 'FILL',
     layoutSizingVertical: 'HUG',
   });
-  // Column width = (390 - body pad 10*2 - gap 8) / 2 = 181
-  const COL_W = 181;
+
   const colL = await rpc('create_frame', { name: 'Col L', parentId: grid.nodeId, width: COL_W });
   const colR = await rpc('create_frame', { name: 'Col R', parentId: grid.nodeId, width: COL_W });
   for (const col of [colL, colR]) {
@@ -528,10 +693,6 @@ async function main() {
       nodeId: col.nodeId,
       layoutMode: 'VERTICAL',
       itemSpacing: 8,
-      paddingLeft: 0,
-      paddingRight: 0,
-      paddingTop: 0,
-      paddingBottom: 4,
     });
     await rpc('set_layout_props', {
       nodeId: col.nodeId,
@@ -541,17 +702,17 @@ async function main() {
     await size(col.nodeId, COL_W, 100);
   }
 
-  for (let i = 0; i < TEMPLATES.length; i++) {
-    const tpl = TEMPLATES[i];
+  for (let i = 0; i < styles.length; i++) {
+    const tpl = styles[i];
     const col = i % 2 === 0 ? colL : colR;
     const card = await rpc('create_frame', {
-      name: `Card/${tpl.n} ${tpl.name}`,
+      name: `Card/${hub.id}/${tpl.n} ${tpl.name}`,
       parentId: col.nodeId,
       width: COL_W,
     });
     await fill(card.nodeId, C.white);
-    await rpc('set_corner_radius', { nodeId: card.nodeId, radius: 14 });
-    await shadow(card.nodeId, 2, 6, 0.05);
+    await rpc('set_corner_radius', { nodeId: card.nodeId, radius: 16 });
+    await shadow(card.nodeId, 3, 12, 0.06);
     await rpc('set_auto_layout', {
       nodeId: card.nodeId,
       layoutMode: 'VERTICAL',
@@ -559,9 +720,11 @@ async function main() {
     });
     await rpc('set_layout_props', {
       nodeId: card.nodeId,
-      layoutSizingHorizontal: 'FILL',
+      layoutSizingHorizontal: 'FIXED',
       layoutSizingVertical: 'HUG',
+      clipsContent: true,
     });
+    await sizeWidthHug(card.nodeId, COL_W);
 
     const coverWrap = await rpc('create_frame', {
       name: `CoverWrap/${tpl.n}`,
@@ -570,43 +733,40 @@ async function main() {
       height: tpl.h,
     });
     await fill(coverWrap.nodeId, C.white);
-    await rpc('set_corner_radius', {
-      nodeId: coverWrap.nodeId,
-      radius: 14,
-      topLeftRadius: 14,
-      topRightRadius: 14,
-      bottomLeftRadius: 0,
-      bottomRightRadius: 0,
-    });
-    await rpc('set_auto_layout', {
-      nodeId: coverWrap.nodeId,
-      layoutMode: 'NONE',
-    });
+    await rpc('set_auto_layout', { nodeId: coverWrap.nodeId, layoutMode: 'NONE' });
     await rpc('set_layout_props', {
       nodeId: coverWrap.nodeId,
-      layoutSizingHorizontal: 'FILL',
+      layoutSizingHorizontal: 'FIXED',
       layoutSizingVertical: 'FIXED',
       clipsContent: true,
     });
     await size(coverWrap.nodeId, COL_W, tpl.h);
+    // 瀑布流封面默认 contain，避免 FILL 裁掉头脚/物件导致「显示不全」
+    if (tpl.fit === 'cover') {
+      await placeFittedImage({
+        parentId: coverWrap.nodeId,
+        name: `Cover/${tpl.n}`,
+        file: tpl.file,
+        wrapW: COL_W,
+        wrapH: tpl.h,
+      });
+    } else {
+      await placeContainImage({
+        parentId: coverWrap.nodeId,
+        name: `Cover/${tpl.n}`,
+        file: tpl.file,
+        wrapW: COL_W,
+        wrapH: tpl.h,
+        inset: 6,
+      });
+    }
 
-    // Centered full-subject cover (no crop / no corner-biased FIT)
-    await placeFittedImage({
-      parentId: coverWrap.nodeId,
-      name: `Cover/${tpl.n}`,
-      file: tpl.file,
-      wrapW: COL_W,
-      wrapH: tpl.h,
-    });
     const badge = await rpc('create_frame', {
-      name: `Tag/${tpl.cat}`,
+      name: 'Badge/变身',
       parentId: coverWrap.nodeId,
-      x: 8,
-      y: 8,
     });
-    await fill(badge.nodeId, { r: 0.93, g: 0.97, b: 0.9 });
-    await rpc('set_corner_radius', { nodeId: badge.nodeId, radius: 10 });
-    await shadow(badge.nodeId, 1, 6, 0.08);
+    await fill(badge.nodeId, C.white);
+    await rpc('set_corner_radius', { nodeId: badge.nodeId, radius: 8 });
     await rpc('set_auto_layout', {
       nodeId: badge.nodeId,
       layoutMode: 'HORIZONTAL',
@@ -614,16 +774,17 @@ async function main() {
       paddingRight: 8,
       paddingTop: 3,
       paddingBottom: 3,
-      primaryAxisAlignItems: 'CENTER',
-      counterAxisAlignItems: 'CENTER',
     });
     await rpc('set_layout_props', {
       nodeId: badge.nodeId,
       layoutSizingHorizontal: 'HUG',
       layoutSizingVertical: 'HUG',
     });
-    await text(badge.nodeId, tpl.cat, { size: 10, style: 'Semi Bold', color: C.green });
-    // Top-right so tag doesn't cover the subject
+    await text(badge.nodeId, '变身', {
+      size: 10,
+      style: 'Semi Bold',
+      color: C.green,
+    });
     {
       const b = await rpc('get_node', { nodeId: badge.nodeId });
       const tw = b.node?.width ?? 36;
@@ -634,7 +795,7 @@ async function main() {
       });
     }
 
-    const meta = await rpc('create_frame', { name: 'Meta', parentId: card.nodeId, height: 48 });
+    const meta = await rpc('create_frame', { name: 'Meta', parentId: card.nodeId });
     await fill(meta.nodeId, C.white);
     await rpc('set_auto_layout', {
       nodeId: meta.nodeId,
@@ -651,332 +812,570 @@ async function main() {
       layoutSizingVertical: 'HUG',
     });
     await text(meta.nodeId, tpl.n, { size: 11, style: 'Semi Bold', color: C.green });
-    await text(meta.nodeId, tpl.name, { size: 13, style: 'Medium' });
-  }
+    {
+      const titleId = await text(meta.nodeId, tpl.name, { size: 13, style: 'Medium' });
+      try {
+        await rpc('set_layout_props', {
+          nodeId: titleId,
+          layoutSizingHorizontal: 'FILL',
+          layoutSizingVertical: 'HUG',
+        });
+        await rpc('set_text_properties', {
+          nodeId: titleId,
+          textAutoResize: 'HEIGHT',
+        });
+      } catch {
+        /* optional */
+      }
+    }
 
-  // Design artboard: HUG full waterfall so canvas shows all cards (no clip).
-  // Separate phone preview frame (created below) is 390×844 + VERTICAL overflow for Present.
-  {
+    await sizeWidthHug(card.nodeId, COL_W);
     await rpc('set_layout_props', {
-      nodeId: home,
+      nodeId: card.nodeId,
       layoutSizingHorizontal: 'FIXED',
       layoutSizingVertical: 'HUG',
-      clipsContent: false,
-      overflowDirection: 'NONE',
-      numberOfFixedChildren: 0,
+      clipsContent: true,
     });
-    const homeNode = await rpc('get_node', { nodeId: home, depth: 1 });
-    const kids = homeNode.node?.children || homeNode.children || [];
-    const bodyId =
-      (
-        await rpc('search_nodes', { name: 'Body', root: home })
-      ).nodes?.find((c) => c.name === 'Body' && c.parentId === home)?.id ||
-      kids.find((c) => c.name === 'Body')?.id;
-    if (bodyId) {
-      await rpc('set_layout_props', {
-        nodeId: bodyId,
-        layoutSizingHorizontal: 'FILL',
-        layoutSizingVertical: 'HUG',
-        clipsContent: false,
-        overflowDirection: 'NONE',
-        numberOfFixedChildren: 0,
-      });
-    }
-    await rpc('rename_node', { nodeId: home, name: '01 首页·风格模板（全高可看全）' }).catch(() => {});
+    await size(coverWrap.nodeId, COL_W, tpl.h);
+  }
 
-    // Phone Present frame: clone home into 390×844 scroll shell (placed after flow screens)
-    const homeAfter = (await rpc('get_node', { nodeId: home })).node || homeNode.node;
-    const phone = await rpc('create_frame', {
+  await sizeWidthHug(colL.nodeId, COL_W);
+  await sizeWidthHug(colR.nodeId, COL_W);
+
+  await rpc('set_layout_props', {
+    nodeId: page,
+    layoutSizingHorizontal: 'FIXED',
+    layoutSizingVertical: 'HUG',
+    clipsContent: false,
+    overflowDirection: 'NONE',
+    numberOfFixedChildren: 0,
+  });
+  const letter = hub.id === 'person' ? 'a' : hub.id === 'pet' ? 'b' : 'c';
+  await rpc('rename_node', { nodeId: page, name: `01${letter} ${hub.name}·风格（全高）` }).catch(() => {});
+
+  const pageAfter = (await rpc('get_node', { nodeId: page })).node;
+  const phonePv = await rpc('create_frame', {
+    name: `01${letter} 手机预览·${hub.tag}`,
+    x: index * (390 + 60),
+    y: Math.max(2400, (pageAfter?.height || 900) + 80),
+    width: 390,
+    height: 844,
+  });
+  await fill(phonePv.nodeId, C.bg);
+  await rpc('set_auto_layout', { nodeId: phonePv.nodeId, layoutMode: 'VERTICAL', itemSpacing: 0 });
+  await rpc('set_layout_props', {
+    nodeId: phonePv.nodeId,
+    layoutSizingHorizontal: 'FIXED',
+    layoutSizingVertical: 'FIXED',
+    clipsContent: true,
+    overflowDirection: 'VERTICAL',
+    numberOfFixedChildren: 0,
+  });
+  await size(phonePv.nodeId, 390, 844);
+  const cloned = await rpc('clone_node', { nodeId: page });
+  await rpc('rename_node', { nodeId: cloned.nodeId, name: `HubScroll/${hub.id}` });
+  await rpc('reparent_nodes', { nodeIds: [cloned.nodeId], newParentId: phonePv.nodeId });
+  await rpc('set_layout_props', {
+    nodeId: cloned.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+    clipsContent: false,
+    overflowDirection: 'NONE',
+    numberOfFixedChildren: 0,
+  });
+
+  return { designId: page, phoneId: phonePv.nodeId };
+}
+
+async function main() {
+  console.log('Waiting…');
+  await waitPlugin();
+
+  // Clear old top-level frames
+  const doc = await rpc('get_document', {});
+  const old = (doc.children || []).filter((c) => c.type === 'FRAME').map((c) => c.id);
+  if (old.length) await rpc('delete_nodes', { nodeIds: old });
+
+  // ═══════════ 01 首页 · 三大类入口（全屏影像，简约高级） ═══════════
+  const HOME_H = 844;
+  const home = await phone('01 首页·三大类', 0);
+  await fillLinearVertical(home, [
+    { position: 0, color: { r: 0.975, g: 0.978, b: 0.97, a: 1 } },
+    { position: 0.35, color: { r: 0.965, g: 0.968, b: 0.96, a: 1 } },
+    { position: 1, color: { r: 0.945, g: 0.95, b: 0.94, a: 1 } },
+  ]);
+
+  const hHead = await rpc('create_frame', { name: 'Header', parentId: home, width: 390 });
+  await rpc('set_fills', { nodeId: hHead.nodeId, fills: [] });
+  await rpc('set_auto_layout', {
+    nodeId: hHead.nodeId,
+    layoutMode: 'VERTICAL',
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingTop: 18,
+    paddingBottom: 12,
+    itemSpacing: 6,
+  });
+  await rpc('set_layout_props', {
+    nodeId: hHead.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+  });
+  await text(hHead.nodeId, 'XOLOME', {
+    size: 11,
+    style: 'Bold',
+    color: C.green,
+  });
+  await text(hHead.nodeId, '开始创作', { size: 26, style: 'Bold' });
+  await text(hHead.nodeId, '选原图类型，进入复刻或变身', {
+    size: 13,
+    color: C.muted,
+  });
+
+  const headAfter = (await rpc('get_node', { nodeId: hHead.nodeId })).node;
+  const headH = Math.min(140, Math.max(72, headAfter?.height || 96));
+
+  const bodyPadY = 8 + 10;
+  const gap = 10;
+  const panelH = Math.max(
+    190,
+    Math.floor((HOME_H - headH - bodyPadY - gap * 2) / 3),
+  );
+  console.log('home panelH', panelH, 'headH', headH);
+
+  const body = await rpc('create_frame', { name: 'Body', parentId: home, width: 390 });
+  await rpc('set_fills', { nodeId: body.nodeId, fills: [] });
+  await rpc('set_auto_layout', {
+    nodeId: body.nodeId,
+    layoutMode: 'VERTICAL',
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 8,
+    paddingBottom: 10,
+    itemSpacing: gap,
+  });
+  await rpc('set_layout_props', {
+    nodeId: body.nodeId,
+    layoutSizingHorizontal: 'FILL',
+    layoutSizingVertical: 'HUG',
+    layoutAlign: 'STRETCH',
+  });
+
+  for (const hub of HUBS) {
+    await createHubCard(body.nodeId, hub, panelH);
+  }
+
+  await rpc('set_layout_props', {
+    nodeId: home,
+    layoutSizingHorizontal: 'FIXED',
+    layoutSizingVertical: 'FIXED',
+    clipsContent: true,
+    overflowDirection: 'NONE',
+    numberOfFixedChildren: 0,
+  });
+  await size(home, 390, HOME_H);
+  await rpc('rename_node', { nodeId: home, name: '01 首页·三大类（全高）' }).catch(() => {});
+
+  {
+    const phonePv = await rpc('create_frame', {
       name: '01 手机预览·可滚动',
-      x: 6 * (390 + 60) + 80,
+      x: 9 * (390 + 60) + 80,
       y: 0,
       width: 390,
       height: 844,
     });
-    await fill(phone.nodeId, C.bg);
-    await rpc('set_auto_layout', {
-      nodeId: phone.nodeId,
-      layoutMode: 'VERTICAL',
-      itemSpacing: 0,
-    });
+    await fill(phonePv.nodeId, C.homeBg);
+    await rpc('set_auto_layout', { nodeId: phonePv.nodeId, layoutMode: 'VERTICAL', itemSpacing: 0 });
     await rpc('set_layout_props', {
-      nodeId: phone.nodeId,
+      nodeId: phonePv.nodeId,
       layoutSizingHorizontal: 'FIXED',
       layoutSizingVertical: 'FIXED',
       clipsContent: true,
       overflowDirection: 'VERTICAL',
       numberOfFixedChildren: 0,
     });
-    await size(phone.nodeId, 390, 844);
+    await size(phonePv.nodeId, 390, 844);
     const cloned = await rpc('clone_node', { nodeId: home });
-    const cid = cloned.nodeId;
-    await rpc('rename_node', { nodeId: cid, name: 'HomeScrollContent' });
-    await rpc('reparent_nodes', { nodeIds: [cid], newParentId: phone.nodeId });
+    await rpc('rename_node', { nodeId: cloned.nodeId, name: 'HomeScrollContent' });
+    await rpc('reparent_nodes', { nodeIds: [cloned.nodeId], newParentId: phonePv.nodeId });
     await rpc('set_layout_props', {
-      nodeId: cid,
+      nodeId: cloned.nodeId,
       layoutSizingHorizontal: 'FILL',
-      layoutSizingVertical: 'HUG',
-      clipsContent: false,
+      layoutSizingVertical: 'FIXED',
+      clipsContent: true,
       overflowDirection: 'NONE',
       numberOfFixedChildren: 0,
     });
-    console.log(
-      'home full-height',
-      homeAfter?.height || 'hug',
-      '+ phone preview',
-      phone.nodeId,
-      'overflow=VERTICAL',
-    );
+    await size(cloned.nodeId, 390, HOME_H);
+    console.log('home hubs', HOME_H, '+ phone', phonePv.nodeId);
   }
 
-  // ═══════════ 02 上传照片 ═══════════
-  const s2 = await phone('02 DIY·上传照片', 1);
-  const n2 = await rpc('create_frame', { name: 'Nav', parentId: s2, height: 48 });
-  await fill(n2.nodeId, C.bg);
-  await rpc('set_auto_layout', {
-    nodeId: n2.nodeId,
-    layoutMode: 'HORIZONTAL',
-    paddingLeft: 20,
-    paddingRight: 20,
-    primaryAxisAlignItems: 'SPACE_BETWEEN',
-    counterAxisAlignItems: 'CENTER',
-  });
-  await rpc('set_layout_props', { nodeId: n2.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'FIXED' });
-  await size(n2.nodeId, 390, 48);
-  await text(n2.nodeId, 'AI 趣味创作', { size: 17, style: 'Bold' });
-  await text(n2.nodeId, '作品', { size: 14, style: 'Medium', color: C.green });
-
-  const hero = await rpc('create_frame', { name: 'Hero', parentId: s2, height: 120 });
-  await fill(hero.nodeId, { r: 0.98, g: 0.975, b: 0.97 });
-  await rpc('set_auto_layout', {
-    nodeId: hero.nodeId,
-    layoutMode: 'VERTICAL',
-    paddingLeft: 24,
-    paddingRight: 24,
-    paddingTop: 20,
-    paddingBottom: 22,
-    itemSpacing: 8,
-    primaryAxisAlignItems: 'MIN',
-  });
-  await rpc('set_layout_props', { nodeId: hero.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
-  // Light photo bg + soft white wash so copy stays readable
-  {
-    const heroBgPath = join(PROTO_ROOT, 'assets', 'diy-hero-bg.png');
-    const bg = await rpc('import_image', {
-      name: 'HeroBg',
-      data: readFileSync(heroBgPath).toString('base64'),
-      width: 390,
-      height: 140,
-      scaleMode: 'FILL',
-    });
-    await rpc('reparent_nodes', { nodeIds: [bg.nodeId], newParentId: hero.nodeId, index: 0 });
-    await rpc('set_layout_props', {
-      nodeId: bg.nodeId,
-      layoutPositioning: 'ABSOLUTE',
-      layoutSizingHorizontal: 'FIXED',
-      layoutSizingVertical: 'FIXED',
-    });
-    await rpc('set_position', { nodeId: bg.nodeId, x: 0, y: 0 });
-    await size(bg.nodeId, 390, 140);
-    const wash = await rpc('create_frame', { name: 'HeroWash', parentId: hero.nodeId, width: 390, height: 140 });
-    await rpc('set_fills', {
-      nodeId: wash.nodeId,
-      fills: [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.35 }],
-    });
-    await rpc('set_layout_props', {
-      nodeId: wash.nodeId,
-      layoutPositioning: 'ABSOLUTE',
-      layoutSizingHorizontal: 'FIXED',
-      layoutSizingVertical: 'FIXED',
-    });
-    await rpc('set_position', { nodeId: wash.nodeId, x: 0, y: 0 });
-    await rpc('reorder_nodes', { nodeIds: [wash.nodeId], index: 1 });
+  // ═══════════ 01a/b/c 二级风格瀑布流 ═══════════
+  const hubPages = {};
+  for (let i = 0; i < HUBS.length; i++) {
+    hubPages[HUBS[i].id] = await buildHubWaterfallPage(HUBS[i], i + 1);
   }
-  await text(hero.nodeId, 'XOLOMe Lab', { size: 12, style: 'Medium', color: C.green });
-  await text(hero.nodeId, '把照片变成一段温暖的故事', {
-    size: 20,
-    style: 'Bold',
-    color: { r: 0.16, g: 0.15, b: 0.14 },
-  });
-  await text(hero.nodeId, '选一张光线柔和、主体清晰的照片，开始创作', {
-    size: 12,
-    color: { r: 0.42, g: 0.4, b: 0.38 },
-  });
 
-  const steps2 = await rpc('create_frame', { name: 'Steps', parentId: s2, height: 72 });
-  await fill(steps2.nodeId, C.bg);
-  await rpc('set_auto_layout', {
-    nodeId: steps2.nodeId,
-    layoutMode: 'HORIZONTAL',
-    paddingLeft: 24,
-    paddingRight: 24,
-    paddingTop: 14,
-    paddingBottom: 14,
-    primaryAxisAlignItems: 'SPACE_BETWEEN',
-    counterAxisAlignItems: 'CENTER',
-  });
-  await rpc('set_layout_props', { nodeId: steps2.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
-  for (const [lab, on] of [
-    ['1 上传照片', true],
-    ['2 制作抽卡素材', false],
-    ['3 制作动态卡片', false],
-  ]) {
-    const st = await rpc('create_frame', { name: lab, parentId: steps2.nodeId });
-    await rpc('set_fills', { nodeId: st.nodeId, fills: [] });
+  // ═══════════ 03a/b/c 上传照片（按三大类分屏） ═══════════
+  const UPLOAD_GUIDE = {
+    person: 'guide-person.png',
+    pet: 'guide-pet.png',
+    toy: 'guide-toy.png',
+  };
+  const uploadPages = {};
+  for (let ui = 0; ui < HUBS.length; ui++) {
+    const hub = HUBS[ui];
+    const letter = hub.id === 'person' ? 'a' : hub.id === 'pet' ? 'b' : 'c';
+    const s2 = await phone(`03${letter} DIY·上传照片·${hub.tag}`, 4 + ui);
+    const n2 = await rpc('create_frame', { name: 'Nav', parentId: s2, height: 48 });
+    await fill(n2.nodeId, C.bg);
     await rpc('set_auto_layout', {
-      nodeId: st.nodeId,
-      layoutMode: 'VERTICAL',
-      itemSpacing: 4,
-      counterAxisAlignItems: 'CENTER',
-    });
-    const dot = await rpc('create_frame', { name: 'dot', parentId: st.nodeId, width: 28, height: 28 });
-    await fill(dot.nodeId, on ? C.green : C.soft);
-    await rpc('set_corner_radius', { nodeId: dot.nodeId, radius: 14 });
-    await rpc('set_auto_layout', {
-      nodeId: dot.nodeId,
+      nodeId: n2.nodeId,
       layoutMode: 'HORIZONTAL',
-      primaryAxisAlignItems: 'CENTER',
+      paddingLeft: 20,
+      paddingRight: 20,
+      primaryAxisAlignItems: 'SPACE_BETWEEN',
       counterAxisAlignItems: 'CENTER',
     });
     await rpc('set_layout_props', {
-      nodeId: dot.nodeId,
-      layoutSizingHorizontal: 'FIXED',
+      nodeId: n2.nodeId,
+      layoutSizingHorizontal: 'FILL',
       layoutSizingVertical: 'FIXED',
     });
-    await size(dot.nodeId, 28, 28);
-    await text(dot.nodeId, lab[0], {
-      size: 13,
-      style: 'Semi Bold',
-      color: on ? C.white : C.muted,
+    await size(n2.nodeId, 390, 48);
+    await makeBackHome(n2.nodeId);
+    await text(n2.nodeId, 'AI 趣味创作', { size: 17, style: 'Bold' });
+    await text(n2.nodeId, hub.tag, { size: 14, style: 'Medium', color: C.green });
+
+    const hero = await rpc('create_frame', { name: 'Hero', parentId: s2, height: 120 });
+    await fill(hero.nodeId, { r: 0.98, g: 0.975, b: 0.97 });
+    await rpc('set_auto_layout', {
+      nodeId: hero.nodeId,
+      layoutMode: 'VERTICAL',
+      paddingLeft: 24,
+      paddingRight: 24,
+      paddingTop: 20,
+      paddingBottom: 22,
+      itemSpacing: 8,
+      primaryAxisAlignItems: 'MIN',
     });
     await rpc('set_layout_props', {
-      nodeId: dot.nodeId,
-      layoutSizingHorizontal: 'FIXED',
-      layoutSizingVertical: 'FIXED',
-    });
-    await size(dot.nodeId, 28, 28);
-    await text(st.nodeId, lab.slice(2), { size: 11, color: on ? C.ink : C.muted });
-    await rpc('set_layout_props', {
-      nodeId: st.nodeId,
+      nodeId: hero.nodeId,
       layoutSizingHorizontal: 'FILL',
       layoutSizingVertical: 'HUG',
     });
-  }
+    {
+      const heroBgPath = join(PROTO_ROOT, 'assets', 'diy-hero-bg.png');
+      const bg = await rpc('import_image', {
+        name: 'HeroBg',
+        data: readFileSync(heroBgPath).toString('base64'),
+        width: 390,
+        height: 140,
+        scaleMode: 'FILL',
+      });
+      await rpc('reparent_nodes', { nodeIds: [bg.nodeId], newParentId: hero.nodeId, index: 0 });
+      await rpc('set_layout_props', {
+        nodeId: bg.nodeId,
+        layoutPositioning: 'ABSOLUTE',
+        layoutSizingHorizontal: 'FIXED',
+        layoutSizingVertical: 'FIXED',
+      });
+      await rpc('set_position', { nodeId: bg.nodeId, x: 0, y: 0 });
+      await size(bg.nodeId, 390, 140);
+      const wash = await rpc('create_frame', {
+        name: 'HeroWash',
+        parentId: hero.nodeId,
+        width: 390,
+        height: 140,
+      });
+      await rpc('set_fills', {
+        nodeId: wash.nodeId,
+        fills: [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.35 }],
+      });
+      await rpc('set_layout_props', {
+        nodeId: wash.nodeId,
+        layoutPositioning: 'ABSOLUTE',
+        layoutSizingHorizontal: 'FIXED',
+        layoutSizingVertical: 'FIXED',
+      });
+      await rpc('set_position', { nodeId: wash.nodeId, x: 0, y: 0 });
+      await rpc('reorder_nodes', { nodeIds: [wash.nodeId], index: 1 });
+    }
+    await text(hero.nodeId, 'XOLOMe Lab', { size: 12, style: 'Medium', color: C.green });
+    await text(hero.nodeId, '把照片变成一段温暖的故事', {
+      size: 20,
+      style: 'Bold',
+      color: { r: 0.16, g: 0.15, b: 0.14 },
+    });
+    // 原版文案（三大类共用）
+    await text(hero.nodeId, '选一张光线柔和、主体清晰的照片，开始创作', {
+      size: 12,
+      color: { r: 0.42, g: 0.4, b: 0.38 },
+    });
 
-  const b2 = await rpc('create_frame', { name: 'Body', parentId: s2 });
-  await fill(b2.nodeId, C.bg);
-  await rpc('set_auto_layout', {
-    nodeId: b2.nodeId,
-    layoutMode: 'VERTICAL',
-    paddingLeft: 20,
-    paddingRight: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
-    itemSpacing: 14,
-  });
-  await rpc('set_layout_props', { nodeId: b2.nodeId, layoutGrow: 1, layoutAlign: 'STRETCH' });
-
-  const upload = await rpc('create_frame', { name: 'Upload', parentId: b2.nodeId, height: 300 });
-  await fill(upload.nodeId, C.white);
-  await rpc('set_corner_radius', { nodeId: upload.nodeId, radius: 20 });
-  await shadow(upload.nodeId, 4, 16, 0.05);
-  await rpc('set_strokes', {
-    nodeId: upload.nodeId,
-    strokes: [{ type: 'SOLID', color: C.green, opacity: 0.55 }],
-    strokeWeight: 1.5,
-    dashPattern: [7, 5],
-  });
-  await rpc('set_auto_layout', {
-    nodeId: upload.nodeId,
-    layoutMode: 'VERTICAL',
-    paddingTop: 36,
-    paddingBottom: 36,
-    paddingLeft: 20,
-    paddingRight: 20,
-    itemSpacing: 10,
-    primaryAxisAlignItems: 'CENTER',
-    counterAxisAlignItems: 'CENTER',
-  });
-  await rpc('set_layout_props', { nodeId: upload.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'FIXED' });
-  await size(upload.nodeId, 350, 200);
-  {
-    const icon = await rpc('create_frame', { name: 'UploadIcon', parentId: upload.nodeId, width: 56, height: 56 });
-    await fill(icon.nodeId, { r: 0.93, g: 0.97, b: 0.9 });
-    await rpc('set_corner_radius', { nodeId: icon.nodeId, radius: 28 });
+    const steps2 = await rpc('create_frame', { name: 'Steps', parentId: s2, height: 72 });
+    await fill(steps2.nodeId, C.bg);
     await rpc('set_auto_layout', {
-      nodeId: icon.nodeId,
+      nodeId: steps2.nodeId,
       layoutMode: 'HORIZONTAL',
-      primaryAxisAlignItems: 'CENTER',
+      paddingLeft: 24,
+      paddingRight: 24,
+      paddingTop: 14,
+      paddingBottom: 14,
+      primaryAxisAlignItems: 'SPACE_BETWEEN',
       counterAxisAlignItems: 'CENTER',
     });
     await rpc('set_layout_props', {
-      nodeId: icon.nodeId,
+      nodeId: steps2.nodeId,
+      layoutSizingHorizontal: 'FILL',
+      layoutSizingVertical: 'HUG',
+    });
+    for (const [lab, on] of [
+      ['1 上传照片', true],
+      ['2 制作抽卡素材', false],
+      ['3 制作动态卡片', false],
+    ]) {
+      const st = await rpc('create_frame', { name: lab, parentId: steps2.nodeId });
+      await rpc('set_fills', { nodeId: st.nodeId, fills: [] });
+      await rpc('set_auto_layout', {
+        nodeId: st.nodeId,
+        layoutMode: 'VERTICAL',
+        itemSpacing: 4,
+        counterAxisAlignItems: 'CENTER',
+      });
+      const dot = await rpc('create_frame', { name: 'dot', parentId: st.nodeId, width: 28, height: 28 });
+      await fill(dot.nodeId, on ? C.green : C.soft);
+      await rpc('set_corner_radius', { nodeId: dot.nodeId, radius: 14 });
+      await rpc('set_auto_layout', {
+        nodeId: dot.nodeId,
+        layoutMode: 'HORIZONTAL',
+        primaryAxisAlignItems: 'CENTER',
+        counterAxisAlignItems: 'CENTER',
+      });
+      await rpc('set_layout_props', {
+        nodeId: dot.nodeId,
+        layoutSizingHorizontal: 'FIXED',
+        layoutSizingVertical: 'FIXED',
+      });
+      await size(dot.nodeId, 28, 28);
+      await text(dot.nodeId, lab[0], {
+        size: 13,
+        style: 'Semi Bold',
+        color: on ? C.white : C.muted,
+      });
+      await rpc('set_layout_props', {
+        nodeId: dot.nodeId,
+        layoutSizingHorizontal: 'FIXED',
+        layoutSizingVertical: 'FIXED',
+      });
+      await size(dot.nodeId, 28, 28);
+      await text(st.nodeId, lab.slice(2), { size: 11, color: on ? C.ink : C.muted });
+      await rpc('set_layout_props', {
+        nodeId: st.nodeId,
+        layoutSizingHorizontal: 'FILL',
+        layoutSizingVertical: 'HUG',
+      });
+    }
+
+    const b2 = await rpc('create_frame', { name: 'Body', parentId: s2 });
+    await fill(b2.nodeId, C.bg);
+    await rpc('set_auto_layout', {
+      nodeId: b2.nodeId,
+      layoutMode: 'VERTICAL',
+      paddingLeft: 20,
+      paddingRight: 20,
+      paddingTop: 8,
+      paddingBottom: 16,
+      itemSpacing: 12,
+    });
+    await rpc('set_layout_props', { nodeId: b2.nodeId, layoutGrow: 1, layoutAlign: 'STRETCH' });
+
+    // 拍摄示意图
+    const guide = await rpc('create_frame', {
+      name: `Guide/${hub.id}`,
+      parentId: b2.nodeId,
+    });
+    await fill(guide.nodeId, C.white);
+    await rpc('set_corner_radius', { nodeId: guide.nodeId, radius: 16 });
+    await shadow(guide.nodeId, 3, 12, 0.05);
+    await rpc('set_auto_layout', {
+      nodeId: guide.nodeId,
+      layoutMode: 'VERTICAL',
+      paddingLeft: 12,
+      paddingRight: 12,
+      paddingTop: 10,
+      paddingBottom: 10,
+      itemSpacing: 8,
+      counterAxisAlignItems: 'CENTER',
+    });
+    await rpc('set_layout_props', {
+      nodeId: guide.nodeId,
+      layoutSizingHorizontal: 'FILL',
+      layoutSizingVertical: 'HUG',
+    });
+    await text(guide.nodeId, '拍摄示意图', { size: 12, style: 'Semi Bold', color: C.muted });
+    const guideWrap = await rpc('create_frame', {
+      name: `GuideWrap/${hub.id}`,
+      parentId: guide.nodeId,
+      width: 200,
+      height: 240,
+    });
+    await fill(guideWrap.nodeId, { r: 0, g: 0, b: 0 });
+    await rpc('set_corner_radius', { nodeId: guideWrap.nodeId, radius: 12 });
+    await rpc('set_auto_layout', { nodeId: guideWrap.nodeId, layoutMode: 'NONE' });
+    await rpc('set_layout_props', {
+      nodeId: guideWrap.nodeId,
       layoutSizingHorizontal: 'FIXED',
       layoutSizingVertical: 'FIXED',
+      clipsContent: true,
     });
-    await size(icon.nodeId, 56, 56);
-    await text(icon.nodeId, '上传', { size: 14, style: 'Semi Bold', color: C.green });
-  }
-  await text(upload.nodeId, '上传一张主体完整的清晰照片', { size: 15, style: 'Semi Bold' });
-  await text(upload.nodeId, '推荐 9:16 竖版，主体完整入镜、光线充足', { size: 12, color: C.muted });
-
-  const row = await rpc('create_frame', { name: 'Actions', parentId: b2.nodeId });
-  await fill(row.nodeId, C.bg);
-  await rpc('set_auto_layout', {
-    nodeId: row.nodeId,
-    layoutMode: 'HORIZONTAL',
-    itemSpacing: 12,
-  });
-  await rpc('set_layout_props', { nodeId: row.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
-  for (const [lab, solid] of [
-    ['拍照', true],
-    ['从相册选择', false],
-  ]) {
-    const btn = await rpc('create_frame', { name: lab, parentId: row.nodeId, height: 48 });
-    await fill(btn.nodeId, solid ? C.green : C.white);
-    await rpc('set_corner_radius', { nodeId: btn.nodeId, radius: 24 });
-    if (!solid) {
-      await rpc('set_strokes', {
-        nodeId: btn.nodeId,
-        strokes: [{ type: 'SOLID', color: C.green }],
-        strokeWeight: 1.5,
-      });
-    } else await shadow(btn.nodeId, 6, 16, 0.12);
+    await size(guideWrap.nodeId, 200, 240);
+    // 拍摄示意图：全身 contain；留 inset 避开圆角裁脚/头；黑底与示意黑框融合
+    // 对焦准星已烘焙进 guide-*.png（源图绿十字会先 strip，避免重复）
+    await placeContainImage({
+      parentId: guideWrap.nodeId,
+      name: `GuideImg/${hub.id}`,
+      file: UPLOAD_GUIDE[hub.id],
+      wrapW: 200,
+      wrapH: 240,
+      inset: 10,
+    });
+    const upload = await rpc('create_frame', {
+      name: `Upload/${hub.id}`,
+      parentId: b2.nodeId,
+      height: 160,
+    });
+    await fill(upload.nodeId, C.white);
+    await rpc('set_corner_radius', { nodeId: upload.nodeId, radius: 20 });
+    await shadow(upload.nodeId, 4, 16, 0.05);
+    await rpc('set_strokes', {
+      nodeId: upload.nodeId,
+      strokes: [{ type: 'SOLID', color: C.green, opacity: 0.55 }],
+      strokeWeight: 1.5,
+      dashPattern: [7, 5],
+    });
     await rpc('set_auto_layout', {
-      nodeId: btn.nodeId,
-      layoutMode: 'HORIZONTAL',
+      nodeId: upload.nodeId,
+      layoutMode: 'VERTICAL',
+      paddingTop: 22,
+      paddingBottom: 22,
+      paddingLeft: 20,
+      paddingRight: 20,
+      itemSpacing: 8,
       primaryAxisAlignItems: 'CENTER',
       counterAxisAlignItems: 'CENTER',
     });
     await rpc('set_layout_props', {
-      nodeId: btn.nodeId,
+      nodeId: upload.nodeId,
       layoutSizingHorizontal: 'FILL',
-      layoutSizingVertical: 'FIXED',
+      layoutSizingVertical: 'HUG',
     });
-    await size(btn.nodeId, 167, 48);
-    await text(btn.nodeId, lab, {
-      size: 15,
-      style: 'Semi Bold',
-      color: solid ? C.white : C.green,
+    {
+      const icon = await rpc('create_frame', {
+        name: 'UploadIcon',
+        parentId: upload.nodeId,
+        width: 44,
+        height: 44,
+      });
+      await fill(icon.nodeId, { r: 0.93, g: 0.97, b: 0.9 });
+      await rpc('set_corner_radius', { nodeId: icon.nodeId, radius: 22 });
+      await rpc('set_auto_layout', {
+        nodeId: icon.nodeId,
+        layoutMode: 'HORIZONTAL',
+        primaryAxisAlignItems: 'CENTER',
+        counterAxisAlignItems: 'CENTER',
+      });
+      await rpc('set_layout_props', {
+        nodeId: icon.nodeId,
+        layoutSizingHorizontal: 'FIXED',
+        layoutSizingVertical: 'FIXED',
+      });
+      await size(icon.nodeId, 44, 44);
+      await text(icon.nodeId, '上传', { size: 12, style: 'Semi Bold', color: C.green });
+    }
+    // 原版文案
+    await text(upload.nodeId, '上传一张主体完整的清晰照片', { size: 15, style: 'Semi Bold' });
+    await text(upload.nodeId, '推荐 9:16 竖版，主体完整入镜、光线充足', {
+      size: 12,
+      color: C.muted,
     });
+
+    const row = await rpc('create_frame', { name: 'Actions', parentId: b2.nodeId });
+    await fill(row.nodeId, C.bg);
+    await rpc('set_auto_layout', {
+      nodeId: row.nodeId,
+      layoutMode: 'HORIZONTAL',
+      itemSpacing: 12,
+    });
+    await rpc('set_layout_props', {
+      nodeId: row.nodeId,
+      layoutSizingHorizontal: 'FILL',
+      layoutSizingVertical: 'HUG',
+    });
+    for (const [lab, solid] of [
+      ['拍照', true],
+      ['从相册选择', false],
+    ]) {
+      const btn = await rpc('create_frame', {
+        name: `${lab}/${hub.id}`,
+        parentId: row.nodeId,
+        height: 48,
+      });
+      await fill(btn.nodeId, solid ? C.green : C.white);
+      await rpc('set_corner_radius', { nodeId: btn.nodeId, radius: 24 });
+      if (!solid) {
+        await rpc('set_strokes', {
+          nodeId: btn.nodeId,
+          strokes: [{ type: 'SOLID', color: C.green }],
+          strokeWeight: 1.5,
+        });
+      } else await shadow(btn.nodeId, 6, 16, 0.12);
+      await rpc('set_auto_layout', {
+        nodeId: btn.nodeId,
+        layoutMode: 'HORIZONTAL',
+        primaryAxisAlignItems: 'CENTER',
+        counterAxisAlignItems: 'CENTER',
+      });
+      await rpc('set_layout_props', {
+        nodeId: btn.nodeId,
+        layoutSizingHorizontal: 'FILL',
+        layoutSizingVertical: 'FIXED',
+      });
+      await size(btn.nodeId, 167, 48);
+      await text(btn.nodeId, lab, {
+        size: 15,
+        style: 'Semi Bold',
+        color: solid ? C.white : C.green,
+      });
+    }
+
+    const notice = await rpc('create_frame', { name: 'Notice', parentId: b2.nodeId });
+    await fill(notice.nodeId, { r: 0.93, g: 0.97, b: 0.9 });
+    await rpc('set_corner_radius', { nodeId: notice.nodeId, radius: 12 });
+    await rpc('set_auto_layout', {
+      nodeId: notice.nodeId,
+      layoutMode: 'HORIZONTAL',
+      paddingLeft: 12,
+      paddingRight: 12,
+      paddingTop: 10,
+      paddingBottom: 10,
+    });
+    await rpc('set_layout_props', {
+      nodeId: notice.nodeId,
+      layoutSizingHorizontal: 'FILL',
+      layoutSizingVertical: 'HUG',
+    });
+    await text(notice.nodeId, '照片仅用于生成本次创意图片和动态卡片', {
+      size: 11,
+      color: C.muted,
+    });
+
+    uploadPages[hub.id] = s2;
   }
+  const s2 = uploadPages.person;
 
-  const notice = await rpc('create_frame', { name: 'Notice', parentId: b2.nodeId });
-  await fill(notice.nodeId, { r: 0.93, g: 0.97, b: 0.9 });
-  await rpc('set_corner_radius', { nodeId: notice.nodeId, radius: 12 });
-  await rpc('set_auto_layout', {
-    nodeId: notice.nodeId,
-    layoutMode: 'HORIZONTAL',
-    paddingLeft: 12,
-    paddingRight: 12,
-    paddingTop: 10,
-    paddingBottom: 10,
-  });
-  await rpc('set_layout_props', { nodeId: notice.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
-  await text(notice.nodeId, '照片仅用于生成本次创意图片和动态卡片', { size: 11, color: C.muted });
-
-  // ═══════════ 03 制作抽卡 / 首帧候选 ═══════════
-  const s3 = await phone('03 DIY·首帧候选', 2);
+  // ═══════════ 04 制作抽卡 / 首帧候选 ═══════════
+  const s3 = await phone('04 DIY·首帧候选', 7);
   const n3 = await rpc('create_frame', { name: 'Nav', parentId: s3, height: 48 });
   await fill(n3.nodeId, C.bg);
   await rpc('set_auto_layout', {
@@ -989,6 +1388,7 @@ async function main() {
   });
   await rpc('set_layout_props', { nodeId: n3.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'FIXED' });
   await size(n3.nodeId, 390, 48);
+  await makeBackHome(n3.nodeId);
   await text(n3.nodeId, 'AI 趣味创作', { size: 17, style: 'Bold' });
   await text(n3.nodeId, '作品', { size: 14, style: 'Medium', color: C.green });
 
@@ -1098,12 +1498,13 @@ async function main() {
       clipsContent: true,
     });
     await size(fr.nodeId, 169, 220);
-    await placeFittedImage({
+    await placeContainImage({
       parentId: fr.nodeId,
       name: `Thumb/0${i}`,
       file: 'tpl-03-clay-dog.png',
       wrapW: 169,
       wrapH: 220,
+      inset: 8,
     });
     const num = await text(fr.nodeId, `0${i}`, { size: 12, style: 'Semi Bold', color: C.green });
     const tag = await text(fr.nodeId, i === 1 ? '✓ 已选' : '候选', {
@@ -1178,7 +1579,7 @@ async function main() {
   await text(cta3.nodeId, '制作趣味动态', { size: 16, style: 'Semi Bold', color: C.white });
 
   // ═══════════ 04 选择视频玩法 Sheet ═══════════
-  const s4 = await phone('04 DIY·选择视频玩法', 3);
+  const s4 = await phone('05 DIY·选择视频玩法', 8);
   await fill(s4, { r: 0.12, g: 0.12, b: 0.14 });
   await rpc('set_auto_layout', {
     nodeId: s4,
@@ -1188,7 +1589,7 @@ async function main() {
     counterAxisAlignItems: 'MIN',
   });
   // spacer pushes sheet to bottom
-  const dim = await rpc('create_frame', { name: 'Dimmed DIY', parentId: s4 });
+  const dim = await rpc('create_frame', { name: 'Back/关闭玩法', parentId: s4 });
   await fill(dim.nodeId, { r: 0.08, g: 0.08, b: 0.1 }, 0.55);
   await rpc('set_layout_props', {
     nodeId: dim.nodeId,
@@ -1238,20 +1639,38 @@ async function main() {
   await rpc('set_layout_props', { nodeId: sht.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
   await text(sht.nodeId, '选择视频玩法', { size: 18, style: 'Bold' });
   {
-    const sub = await text(sht.nodeId, '当前模板：粘土小狗 · 选后立即生效', { size: 12, color: C.muted });
+    const sub = await text(sht.nodeId, '当前模板：粘土宠物 · 选后立即生效', { size: 12, color: C.muted });
     await rpc('set_layout_props', { nodeId: sub, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
     await rpc('set_text_properties', { nodeId: sub, textAutoResize: 'HEIGHT' });
   }
-  await text(sh.nodeId, '✕', { size: 18, color: C.muted });
+  {
+    const close = await rpc('create_frame', { name: 'Back/关闭玩法', parentId: sh.nodeId });
+    await rpc('set_fills', { nodeId: close.nodeId, fills: [] });
+    await rpc('set_auto_layout', {
+      nodeId: close.nodeId,
+      layoutMode: 'HORIZONTAL',
+      paddingLeft: 8,
+      paddingRight: 4,
+      paddingTop: 4,
+      paddingBottom: 4,
+    });
+    await rpc('set_layout_props', {
+      nodeId: close.nodeId,
+      layoutSizingHorizontal: 'HUG',
+      layoutSizingVertical: 'HUG',
+    });
+    await text(close.nodeId, '✕', { size: 18, color: C.muted });
+  }
 
-  const playGrid = await rpc('create_frame', { name: 'PlayGrid', parentId: sheet.nodeId });
+  // 三个备选竖排（全宽行卡 + 竖向预览图）
+  const playGrid = await rpc('create_frame', { name: 'PlayList', parentId: sheet.nodeId });
   await rpc('set_fills', { nodeId: playGrid.nodeId, fills: [] });
   await rpc('set_auto_layout', {
     nodeId: playGrid.nodeId,
-    layoutMode: 'HORIZONTAL',
-    layoutWrap: 'WRAP',
-    itemSpacing: 8,
-    counterAxisSpacing: 8,
+    layoutMode: 'VERTICAL',
+    itemSpacing: 10,
+    primaryAxisAlignItems: 'MIN',
+    counterAxisAlignItems: 'MIN',
   });
   await rpc('set_layout_props', {
     nodeId: playGrid.nodeId,
@@ -1259,16 +1678,17 @@ async function main() {
     layoutSizingVertical: 'HUG',
   });
 
-  // Per-template plays from aigc-templates.json (prototype demo: 粘土小狗 3 备选)
+  // Per-template plays from aigc-templates.json (prototype demo: 粘土宠物 3 备选)
   const plays = DEMO_PLAYS.length ? DEMO_PLAYS : ['小狗跳舞', '小狗跳高', '小狗打招呼'];
+  const THUMB_W = 72;
+  const THUMB_H = 96; // 竖向 3:4
   for (let i = 0; i < plays.length; i++) {
     const on = i === 0;
     const cell = await rpc('create_frame', {
       name: `Play/${String(i + 1).padStart(2, '0')}`,
       parentId: playGrid.nodeId,
-      width: 171,
     });
-    await fill(cell.nodeId, C.white);
+    await fill(cell.nodeId, on ? { r: 0.96, g: 0.985, b: 0.95 } : C.white);
     await rpc('set_corner_radius', { nodeId: cell.nodeId, radius: 14 });
     await rpc('set_strokes', {
       nodeId: cell.nodeId,
@@ -1277,58 +1697,80 @@ async function main() {
     });
     await rpc('set_auto_layout', {
       nodeId: cell.nodeId,
-      layoutMode: 'VERTICAL',
-      paddingLeft: 10,
-      paddingRight: 10,
+      layoutMode: 'HORIZONTAL',
+      paddingLeft: 12,
+      paddingRight: 14,
       paddingTop: 10,
-      paddingBottom: 12,
-      itemSpacing: 8,
+      paddingBottom: 10,
+      itemSpacing: 12,
       primaryAxisAlignItems: 'MIN',
+      counterAxisAlignItems: 'CENTER',
     });
     await rpc('set_layout_props', {
       nodeId: cell.nodeId,
-      layoutSizingHorizontal: 'FIXED',
+      layoutSizingHorizontal: 'FILL',
       layoutSizingVertical: 'HUG',
       clipsContent: false,
     });
     const thumbWrap = await rpc('create_frame', {
       name: `PlayThumb/${String(i + 1).padStart(2, '0')}`,
       parentId: cell.nodeId,
-      width: 151,
-      height: 151,
+      width: THUMB_W,
+      height: THUMB_H,
     });
     await fill(thumbWrap.nodeId, C.white);
     await rpc('set_corner_radius', { nodeId: thumbWrap.nodeId, radius: 10 });
     await rpc('set_auto_layout', { nodeId: thumbWrap.nodeId, layoutMode: 'NONE' });
-    // FIXED — FILL in a horizontal PlayGrid squeezes thumbs (~76px) and clips covers
     await rpc('set_layout_props', {
       nodeId: thumbWrap.nodeId,
       layoutSizingHorizontal: 'FIXED',
       layoutSizingVertical: 'FIXED',
       clipsContent: true,
     });
-    await size(thumbWrap.nodeId, 151, 151);
-    await placeFittedImage({
+    await size(thumbWrap.nodeId, THUMB_W, THUMB_H);
+    await placeContainImage({
       parentId: thumbWrap.nodeId,
       name: `PlayCover/${String(i + 1).padStart(2, '0')}`,
       file: 'tpl-03-clay-dog.png',
-      wrapW: 151,
-      wrapH: 151,
+      wrapW: THUMB_W,
+      wrapH: THUMB_H,
+      inset: 6,
     });
-    const num = await text(cell.nodeId, String(i + 1).padStart(2, '0'), {
+    const meta = await rpc('create_frame', {
+      name: `PlayMeta/${String(i + 1).padStart(2, '0')}`,
+      parentId: cell.nodeId,
+    });
+    await rpc('set_fills', { nodeId: meta.nodeId, fills: [] });
+    await rpc('set_auto_layout', {
+      nodeId: meta.nodeId,
+      layoutMode: 'VERTICAL',
+      itemSpacing: 6,
+      primaryAxisAlignItems: 'MIN',
+      counterAxisAlignItems: 'MIN',
+    });
+    await rpc('set_layout_props', {
+      nodeId: meta.nodeId,
+      layoutSizingHorizontal: 'FILL',
+      layoutSizingVertical: 'HUG',
+    });
+    const num = await text(meta.nodeId, `玩法 ${String(i + 1).padStart(2, '0')}`, {
       size: 11,
       style: 'Semi Bold',
       color: C.green,
     });
     await rpc('set_layout_props', { nodeId: num, layoutSizingHorizontal: 'FILL' });
-    const lab = await text(cell.nodeId, plays[i], { size: 13, style: 'Medium' });
+    const lab = await text(meta.nodeId, plays[i], { size: 15, style: 'Medium' });
     await rpc('set_layout_props', { nodeId: lab, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
     await rpc('set_text_properties', { nodeId: lab, textAutoResize: 'HEIGHT' });
+    if (on) {
+      const tip = await text(meta.nodeId, '当前选中', { size: 11, color: C.muted });
+      await rpc('set_layout_props', { nodeId: tip, layoutSizingHorizontal: 'FILL' });
+    }
   }
   await text(sheet.nodeId, '玩法会持续更新', { size: 12, color: C.muted });
 
   // ═══════════ 05 作品详情 + 投放 ═══════════
-  const s5 = await phone('05 作品详情·投放全息舱', 4);
+  const s5 = await phone('06 作品详情·投放全息舱', 9);
   const n5 = await rpc('create_frame', { name: 'Nav', parentId: s5, height: 48 });
   await fill(n5.nodeId, C.bg);
   await rpc('set_auto_layout', {
@@ -1341,7 +1783,7 @@ async function main() {
   });
   await rpc('set_layout_props', { nodeId: n5.nodeId, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'FIXED' });
   await size(n5.nodeId, 390, 48);
-  await text(n5.nodeId, '‹', { size: 24 });
+  await makeBackHome(n5.nodeId, '‹');
   await text(n5.nodeId, '作品详情', { size: 17, style: 'Bold' });
 
   const b5 = await rpc('create_frame', { name: 'Body', parentId: s5 });
@@ -1383,7 +1825,7 @@ async function main() {
     layoutSizingVertical: 'HUG',
   });
   await text(titleLeft.nodeId, DEMO_PLAYS[0] || '小狗跳舞', { size: 22, style: 'Bold' });
-  await text(titleLeft.nodeId, '粘土小狗 · 我的作品', { size: 13, color: C.muted });
+  await text(titleLeft.nodeId, '粘土宠物 · 我的作品', { size: 13, color: C.muted });
   {
     const shareBtn = await rpc('create_frame', { name: '分享', parentId: titleRow.nodeId, height: 32 });
     await fill(shareBtn.nodeId, C.white);
@@ -1421,12 +1863,13 @@ async function main() {
     clipsContent: true,
   });
   await size(player.nodeId, 350, 240);
-  await placeFittedImage({
+  await placeContainImage({
     parentId: player.nodeId,
     name: 'PlayerCover',
     file: 'tpl-03-clay-dog.png',
     wrapW: 350,
     wrapH: 240,
+    inset: 10,
   });
   const scrub = await rpc('create_frame', {
     name: 'Scrub',
@@ -1548,7 +1991,7 @@ async function main() {
   }
 
   // ═══════════ 06 选择播放设备 Sheet ═══════════
-  const s6 = await phone('06 选择播放设备', 5);
+  const s6 = await phone('07 选择播放设备', 10);
   await fill(s6, { r: 0.12, g: 0.12, b: 0.14 });
   await rpc('set_auto_layout', {
     nodeId: s6,
@@ -1557,7 +2000,7 @@ async function main() {
     primaryAxisAlignItems: 'MAX',
     counterAxisAlignItems: 'MIN',
   });
-  const dim6 = await rpc('create_frame', { name: 'Dim', parentId: s6 });
+  const dim6 = await rpc('create_frame', { name: 'Back/关闭设备', parentId: s6 });
   await fill(dim6.nodeId, { r: 0.08, g: 0.08, b: 0.1 }, 0.55);
   await rpc('set_layout_props', {
     nodeId: dim6.nodeId,
@@ -1590,7 +2033,38 @@ async function main() {
     layoutSizingHorizontal: 'FILL',
     layoutSizingVertical: 'HUG',
   });
-  await text(sheet6.nodeId, '选择播放设备', { size: 18, style: 'Bold' });
+  {
+    const head6 = await rpc('create_frame', { name: 'DeviceHead', parentId: sheet6.nodeId });
+    await rpc('set_fills', { nodeId: head6.nodeId, fills: [] });
+    await rpc('set_auto_layout', {
+      nodeId: head6.nodeId,
+      layoutMode: 'HORIZONTAL',
+      primaryAxisAlignItems: 'SPACE_BETWEEN',
+      counterAxisAlignItems: 'CENTER',
+    });
+    await rpc('set_layout_props', {
+      nodeId: head6.nodeId,
+      layoutSizingHorizontal: 'FILL',
+      layoutSizingVertical: 'HUG',
+    });
+    await text(head6.nodeId, '选择播放设备', { size: 18, style: 'Bold' });
+    const close6 = await rpc('create_frame', { name: 'Back/关闭设备', parentId: head6.nodeId });
+    await rpc('set_fills', { nodeId: close6.nodeId, fills: [] });
+    await rpc('set_auto_layout', {
+      nodeId: close6.nodeId,
+      layoutMode: 'HORIZONTAL',
+      paddingLeft: 8,
+      paddingRight: 4,
+      paddingTop: 4,
+      paddingBottom: 4,
+    });
+    await rpc('set_layout_props', {
+      nodeId: close6.nodeId,
+      layoutSizingHorizontal: 'HUG',
+      layoutSizingVertical: 'HUG',
+    });
+    await text(close6.nodeId, '✕', { size: 18, color: C.muted });
+  }
   {
     const sub6 = await text(sheet6.nodeId, '选择已绑定设备，或扫描二维码添加新设备', { size: 12, color: C.muted });
     await rpc('set_layout_props', { nodeId: sub6, layoutSizingHorizontal: 'FILL', layoutSizingVertical: 'HUG' });
@@ -1656,7 +2130,26 @@ async function main() {
     JSON.stringify(
       {
         ok: true,
-        screens: [home, s2, s3, s4, s5, s6],
+        screens: [
+          home,
+          hubPages.person?.designId,
+          hubPages.pet?.designId,
+          hubPages.toy?.designId,
+          uploadPages.person,
+          uploadPages.pet,
+          uploadPages.toy,
+          s3,
+          s4,
+          s5,
+          s6,
+        ],
+        uploadPages,
+        hubPhones: {
+          person: hubPages.person?.phoneId,
+          pet: hubPages.pet?.phoneId,
+          toy: hubPages.toy?.phoneId,
+        },
+        hubs: HUBS.map((h) => ({ id: h.id, n: h.templates.length })),
         templates: TEMPLATES.length,
       },
       null,

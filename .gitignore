@@ -29,3 +29,15 @@ xolome-miniapp/cloudfunctions/*/node_modules/
 dist/
 
 docs/prototypes/**/node_modules/
+**/__pycache__/
+
+# DIY prototype local QA / scratch (covers-v2 is shared via junction)
+docs/prototypes/**/_qa/
+docs/prototypes/**/_figma_qa/
+docs/prototypes/**/_page_qa/
+docs/prototypes/**/_qa_edge/
+docs/prototypes/**/covers-v2/_src/
+docs/prototypes/**/covers-v2/_new_hub_*.png
+
+# diy-waterfall is the junction target for Prototype covers; avoid double-tracking
+docs/prototypes/diy-waterfall/

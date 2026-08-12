@@ -1,13 +1,16 @@
 {
-  "version": "2026-08-10n",
-  "note": "Display reorder: 棉花娃娃→机甲→乐高→自拍盲盒→打工人→学院风BJD→高定爱豆；其余 RPG/汽水/载具/宠物/桌宠/雕塑. 潮玩×7 游戏×3. | 全模板统一：1白底单影生图×3动作视频；飞书中文提示词对齐。",
+  "version": "2026-08-11c",
+  "note": "v2.2: 宠物变身更名「粘土宠物」「羊毛毡宠物」；玩法名同步为宠物*；IA=三大类入口(真人/宠物/玩具)。",
   "templates": [
     {
       "id": "tpl_00_realtime",
       "n": "00",
-      "name": "真人全息动态",
+      "name": "真人复刻",
+      "hub": "person",
+      "hub_name": "真人全息动态",
       "cat": "真人",
       "stylize": false,
+      "input_note": "真人清晰照片；无风格化，白底单影复刻",
       "image_prompt": "Keep the exact real-person identity from the reference photo. Photorealistic, natural skin and clothing, clean pure white studio photography wall, full subject in frame, 9:16 vertical, ready for hologram display. No stylization, no cartoon, no clay, no felt, no blind-box figure look. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
         {
@@ -30,8 +33,10 @@
     {
       "id": "tpl_18_yarn_doll",
       "n": "01",
-      "name": "棉花娃娃",
-      "cat": "潮玩",
+      "name": "变身棉花娃娃",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "image_prompt": "Transform {subject} into a handmade cotton doll / knitted amigurumi plush doll (棉花娃娃). Soft looped yarn hair, round knit face with tiny black bead eyes, tiny stitched smile, soft blush. Knitted cardigan and overalls with clear stitch texture, tiny knitted booties. Chibi plush proportions, tactile yarn throughout, clean white studio background, collectible toy product photo, 9:16. Keep recognizable identity cues (hairstyle color mapping, clothing color hints). Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows. No watermark, no text.",
       "plays": [
@@ -53,115 +58,42 @@
       ]
     },
     {
-      "id": "tpl_01_mecha",
+      "id": "tpl_23_person_mecha",
       "n": "02",
-      "name": "Q版机甲",
-      "cat": "游戏",
+      "name": "变身机甲",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
-      "image_prompt": "Transform {subject} into a chibi Q-version mecha robot figure. Cute SD proportions, white/teal/lime armor accents, clean product render on white background, collectible toy look, sharp edges, soft studio shadow, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "input_note": "真人照片；写实机甲战甲穿在真人身上，保留五官身份",
+      "image_prompt": "Keep the exact real-person identity from the reference photo (face, hair, body proportions). Photorealistic: the person is wearing a full sleek white/teal mecha armor suit with subtle lime energy accents; human face clearly visible (not a robot head). Clean pure white studio backdrop, full subject in frame, 9:16 vertical, product photography for hologram. Not chibi, not cartoon, not toy figure. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
         {
           "id": "play_charge",
           "name": "机甲出击",
-          "video_prompt": "Chibi mecha steps forward and raises weapon, energetic but stable, keep design, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+          "video_prompt": "Person in mecha armor steps forward and raises armored arm into attack stance, keep exact face identity, photorealistic, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
         },
         {
           "id": "play_guard",
           "name": "防御姿态",
-          "video_prompt": "Chibi mecha lifts shield into guard pose, slight stance shift, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+          "video_prompt": "Person in mecha armor shifts into a defensive guard pose with armored arms raised, keep exact face identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
         },
         {
           "id": "play_powerup",
           "name": "能量蓄力",
-          "video_prompt": "Chibi mecha charges energy glow on chest/eyes, idle power-up animation, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_08_pixel",
-      "n": "03",
-      "name": "乐高角色",
-      "cat": "游戏",
-      "stylize": true,
-      "image_prompt": "Transform {subject} into a LEGO / BrickHeadz-style collectible minifigure character (乐高角色). Oversized square blocky head with rounded brick edges, glossy ABS plastic toy finish, stud-and-brick construction look. Keep recognizable identity cues (hair/helmet colors, outfit colors, facial vibe) mapped onto brick parts. Standing full-body three-quarter or front product pose on pure white studio backdrop, soft single ground shadow, premium toy render, 9:16. Not voxel pixel-art, not clay, not vinyl blind-box. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows. No watermark, no text.",
-      "plays": [
-        {
-          "id": "play_walk",
-          "name": "积木行走",
-          "video_prompt": "LEGO BrickHeadz-style figure walks in place with blocky limb motion, keep glossy plastic brick look, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_jump",
-          "name": "积木跳跃",
-          "video_prompt": "LEGO BrickHeadz-style figure hops up and lands solidly, brick parts stay assembled, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_attack",
-          "name": "英雄出击",
-          "video_prompt": "LEGO BrickHeadz-style hero figure steps forward into a power pose / light punch, cape or torso bricks shift slightly, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_04_selfie_blindbox",
-      "n": "04",
-      "name": "自拍盲盒",
-      "cat": "潮玩",
-      "stylize": true,
-      "image_prompt": "User upload is a selfie and may be face-only or half-body (not a full-body photo). First invent a coherent full-body casual street look that matches the selfie identity, then transform into a trendy blind-box vinyl doll (Pop Mart–like collectible / 自拍盲盒). Soft 3D designer-toy proportions (slightly larger head, smooth plastic skin), glossy vinyl finish. Standing full-body facing camera, holding a smartphone at chest height in one hand as if checking a selfie, other arm relaxed. Casual outfit vibe matching the template cover: oversized cream sweatshirt over a white tee, blue jeans with rolled cuffs, clean white sneakers, small bright crossbody bag. Soft smile, large sparkling eyes, keep recognizable face/hairstyle/clothing color cues from the selfie. Pure white studio backdrop, full figure in frame, product shot, 9:16. Do not crop to bust only. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_check",
-          "name": "看手机自拍",
-          "video_prompt": "Selfie blind-box vinyl doll glances at the phone screen then smiles toward camera, slight phone tilt, keep casual street outfit and toy look, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_peace",
-          "name": "比耶自拍",
-          "video_prompt": "Selfie blind-box vinyl doll raises a peace sign beside the phone for a cute selfie pose, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_spin",
-          "name": "转圈展示",
-          "video_prompt": "Selfie blind-box vinyl doll does a small spin to show sweatshirt, jeans and crossbody bag, then faces camera with phone still in hand, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ],
-      "input_note": "自拍即可（可半身/大头），AI 补全身 → 手持手机潮玩盲盒娃"
-    },
-    {
-      "id": "tpl_05_office_blindbox",
-      "n": "05",
-      "name": "打工人盲盒",
-      "cat": "潮玩",
-      "stylize": true,
-      "image_prompt": "Transform {subject} into a tired office-worker blind-box vinyl figure (打工人盲盒). Cute Pop-Mart-like proportions, glossy vinyl toy finish. Exhausted expression with half-closed eyes and under-eye bags, short bob hair. Business casual: light cardigan over shirt, trousers, lanyard with ID badge. Sitting on a small office chair with a laptop on the lap and a takeaway coffee cup in hand, clean white studio backdrop, full figure product shot, 9:16. Keep recognizable identity cues. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_type",
-          "name": "敲键盘加班",
-          "video_prompt": "Office blind-box figure types on a tiny laptop, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_stretch",
-          "name": "伸个懒腰",
-          "video_prompt": "Office blind-box figure stretches arms after work, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_coffee",
-          "name": "摸鱼喝咖啡",
-          "video_prompt": "Office blind-box figure sneaky coffee break sip, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+          "video_prompt": "Mecha armor chest and joint lights glow with energy charge while person stands ready, keep exact face identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
         }
       ]
     },
     {
       "id": "tpl_20_bjd_school_id",
-      "n": "06",
-      "name": "bjd学院风证件照",
-      "cat": "潮玩",
+      "n": "03",
+      "name": "变身bjd学院风证件照",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "input_note": "仅需正脸自拍；生图只保留用户脸，身体/服装完全采用学院风BJD模板身",
-      "face_only": true,
-      "body_from_template": true,
       "image_prompt": "User provides a front-facing face selfie only. Extract and keep ONLY the user's face identity (eyes, brows, nose, mouth, face shape). Discard user's body, clothes, background, and hair length if conflicting. Place that face onto the exact academy-style BJD doll body from the template reference: porcelain BJD skin, large glass-like doll eyes adapted to user iris color, short neat dark brown bob (template hair), light gray tailored blazer, white collared shirt, charcoal pleated tennis skirt, black loafers, straight standing ID-photo pose, arms at sides, facing camera. Match the template body proportions, outfit, and composition exactly — same academy BJD ID look as the reference. Clean pure white studio backdrop, full body in frame, 9:16 vertical ID / product photo. No watermark, no text. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
         {
@@ -183,9 +115,11 @@
     },
     {
       "id": "tpl_19_bjd_idol",
-      "n": "07",
-      "name": "bjd高定爱豆",
-      "cat": "潮玩",
+      "n": "04",
+      "name": "变身bjd高定爱豆",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "input_note": "真实人物照片 → 高定爱豆风 BJD（bjd高定爱豆）",
       "image_prompt": "Transform the real person in the reference photo into a high-end ball-jointed doll (BJD) in haute-couture idol style (bjd高定爱豆). Porcelain-smooth resin doll skin, large expressive BJD eyes with refined makeup, delicate doll facial proportions while keeping recognizable identity cues (face shape, hair color mapping). Slender BJD body. High-fashion all-black idol stage outfit vibe: cropped leather jacket, fitted leather pants with silver zip details, chain belt, sheer mesh overskirt, knee-high boots (adapt colors/details to subject when needed but keep premium idol couture feeling). Full body product render on clean off-white studio background, collectible doll photography, 9:16. No watermark, no text. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
@@ -208,10 +142,94 @@
       ]
     },
     {
+      "id": "tpl_08_pixel",
+      "n": "05",
+      "name": "变身乐高角色",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
+      "stylize": true,
+      "image_prompt": "Transform {subject} into a LEGO / BrickHeadz-style collectible minifigure character (乐高角色). Oversized square blocky head with rounded brick edges, glossy ABS plastic toy finish, stud-and-brick construction look. Keep recognizable identity cues (hair/helmet colors, outfit colors, facial vibe) mapped onto brick parts. Standing full-body three-quarter or front product pose on pure white studio backdrop, soft single ground shadow, premium toy render, 9:16. Not voxel pixel-art, not clay, not vinyl blind-box. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows. No watermark, no text.",
+      "plays": [
+        {
+          "id": "play_walk",
+          "name": "积木行走",
+          "video_prompt": "LEGO BrickHeadz-style figure walks in place with blocky limb motion, keep glossy plastic brick look, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_jump",
+          "name": "积木跳跃",
+          "video_prompt": "LEGO BrickHeadz-style figure hops up and lands solidly, brick parts stay assembled, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_attack",
+          "name": "英雄出击",
+          "video_prompt": "LEGO BrickHeadz-style hero figure steps forward into a power pose / light punch, cape or torso bricks shift slightly, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_04_selfie_blindbox",
+      "n": "06",
+      "name": "变身自拍盲盒",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
+      "stylize": true,
+      "input_note": "自拍即可（可半身/大头），AI 补全身 → 手持手机潮玩盲盒娃",
+      "image_prompt": "User upload is a selfie and may be face-only or half-body (not a full-body photo). First invent a coherent full-body casual street look that matches the selfie identity, then transform into a trendy blind-box vinyl doll (Pop Mart–like collectible / 自拍盲盒). Soft 3D designer-toy proportions (slightly larger head, smooth plastic skin), glossy vinyl finish. Standing full-body facing camera, holding a smartphone at chest height in one hand as if checking a selfie, other arm relaxed. Casual outfit vibe matching the template cover: oversized cream sweatshirt over a white tee, blue jeans with rolled cuffs, clean white sneakers, small bright crossbody bag. Soft smile, large sparkling eyes, keep recognizable face/hairstyle/clothing color cues from the selfie. Pure white studio backdrop, full figure in frame, product shot, 9:16. Do not crop to bust only. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_check",
+          "name": "看手机自拍",
+          "video_prompt": "Selfie blind-box vinyl doll glances at the phone screen then smiles toward camera, slight phone tilt, keep casual street outfit and toy look, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_peace",
+          "name": "比耶自拍",
+          "video_prompt": "Selfie blind-box vinyl doll raises a peace sign beside the phone for a cute selfie pose, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_spin",
+          "name": "转圈展示",
+          "video_prompt": "Selfie blind-box vinyl doll does a small spin to show sweatshirt, jeans and crossbody bag, then faces camera with phone still in hand, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_05_office_blindbox",
+      "n": "07",
+      "name": "变身打工人盲盒",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
+      "stylize": true,
+      "image_prompt": "Transform {subject} into a tired office-worker blind-box vinyl figure (打工人盲盒). Cute Pop-Mart-like proportions, glossy vinyl toy finish. Exhausted expression with half-closed eyes and under-eye bags, short bob hair. Business casual: light cardigan over shirt, trousers, lanyard with ID badge. Sitting on a small office chair with a laptop on the lap and a takeaway coffee cup in hand, clean white studio backdrop, full figure product shot, 9:16. Keep recognizable identity cues. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_type",
+          "name": "敲键盘加班",
+          "video_prompt": "Office blind-box figure types on a tiny laptop, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_stretch",
+          "name": "伸个懒腰",
+          "video_prompt": "Office blind-box figure stretches arms after work, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_coffee",
+          "name": "摸鱼喝咖啡",
+          "video_prompt": "Office blind-box figure sneaky coffee break sip, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
       "id": "tpl_02_rpg",
       "n": "08",
-      "name": "RPG立绘立体化",
-      "cat": "游戏",
+      "name": "变身RPG角色",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "image_prompt": "Transform {subject} into a 3D RPG character standee / figure illustration. Fantasy adventure outfit, heroic pose, detailed but clean, pure white studio backdrop, collectible render, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
@@ -233,210 +251,12 @@
       ]
     },
     {
-      "id": "tpl_06_soda",
-      "n": "09",
-      "name": "汽水瓶人偶",
-      "cat": "潮玩",
-      "stylize": true,
-      "image_prompt": "Transform {subject} into a soda-bottle mascot figure. Bottle silhouette + cute character face/body, glossy plastic, brand-less generic soda colors, product render on pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_fizz",
-          "name": "开盖冒泡",
-          "video_prompt": "Soda mascot pops cap with fizz bubbles, playful, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_dance",
-          "name": "瓶身摇摆舞",
-          "video_prompt": "Soda mascot sways/dances side to side, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_toast",
-          "name": "举瓶干杯",
-          "video_prompt": "Soda mascot raises bottle for a toast, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_07_vehicle",
-      "n": "10",
-      "name": "微缩载具",
-      "cat": "潮玩",
-      "stylize": true,
-      "image_prompt": "Transform reference into a miniature vehicle collectible (match vehicle type if present; otherwise cute personal mini car/scooter themed to subject colors). Die-cast / model kit look, pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_start",
-          "name": "启动加速",
-          "video_prompt": "Mini vehicle starts and rolls forward slightly, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_drift",
-          "name": "小漂移",
-          "video_prompt": "Mini vehicle does a tiny drift turn, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_lights",
-          "name": "亮灯鸣笛",
-          "video_prompt": "Mini vehicle lights blink and subtle horn motion, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_12_clay_dog",
-      "n": "11",
-      "name": "粘土小狗",
-      "cat": "宠物",
-      "stylize": true,
-      "image_prompt": "Transform the real dog in the reference photo into a handmade polymer-clay dog figurine. Preserve breed, fur color pattern, ear shape and face markings. Soft clay material, fingerprint-friendly sculpt, cute big eyes, clean white background, product photography, 9:16. No photoreal fur. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_dance",
-          "name": "小狗跳舞",
-          "video_prompt": "Clay dog figurine does a cute little dance in place, keep clay look and markings, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_jump",
-          "name": "小狗跳高",
-          "video_prompt": "Clay dog figurine makes a small happy jump and lands, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_hello",
-          "name": "小狗打招呼",
-          "video_prompt": "Clay dog figurine sits and paws/waves hello toward camera, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_13_felt_cat",
-      "n": "12",
-      "name": "羊毛毡小猫",
-      "cat": "宠物",
-      "stylize": true,
-      "image_prompt": "Transform the real cat in the reference photo into a needle-felted wool cat figurine. Preserve fur colors, markings, ear shape. Soft wool fiber texture, handmade craft look, pure white studio backdrop, 9:16. No photoreal fur. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_stretch",
-          "name": "小猫伸懒腰",
-          "video_prompt": "Felt cat stretches lazily, soft wool look preserved, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_paw",
-          "name": "小猫扑爪",
-          "video_prompt": "Felt cat does a playful paw swipe, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_nuzzle",
-          "name": "小猫蹭头",
-          "video_prompt": "Felt cat nuzzles / head-rubs cute greeting, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_09_guochao",
-      "n": "13",
-      "name": "数字国潮摆件",
-      "cat": "桌宠",
-      "stylize": true,
-      "image_prompt": "Transform {subject} cues into a digital Guochao ornament / mythical guardian figure (auspicious beast motif inspired by subject colors). Jade, gold, lacquer accents, premium desktop ornament render on pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_nod",
-          "name": "祥瑞点头",
-          "video_prompt": "Guochao ornament nods once auspiciously, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_glow",
-          "name": "纹样发光",
-          "video_prompt": "Patterns/eyes glow softly then settle, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_guard",
-          "name": "守护姿态",
-          "video_prompt": "Ornament shifts into a guardian stance, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_10_sprite",
-      "n": "14",
-      "name": "桌面小精灵",
-      "cat": "桌宠",
-      "stylize": true,
-      "image_prompt": "Transform {subject} into a cute desktop companion sprite/robot pet. Soft rounded forms, friendly face screen or eyes, brand green accents optional, clean white desk product shot, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_hi",
-          "name": "蹦跳问好",
-          "video_prompt": "Desktop sprite bounces and waves hello, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_bye",
-          "name": "挥手道别",
-          "video_prompt": "Desktop sprite waves goodbye, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_sit",
-          "name": "坐下陪伴",
-          "video_prompt": "Desktop sprite sits patiently companion-like, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_11_weather",
-      "n": "15",
-      "name": "天气精灵",
-      "cat": "桌宠",
-      "stylize": true,
-      "image_prompt": "Transform {subject} into a weather spirit companion figure (sun/cloud/rain motifs). Soft toy-like or resin figure, cheerful, pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_sunny",
-          "name": "晴天微笑",
-          "video_prompt": "Weather spirit sunny smile, light sparkle, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_rain",
-          "name": "下雨打伞",
-          "video_prompt": "Weather spirit opens tiny umbrella in soft rain, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_wind",
-          "name": "刮风旋转",
-          "video_prompt": "Weather spirit spins gently in wind, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
-      "id": "tpl_14_plant",
-      "n": "16",
-      "name": "桌面盆栽",
-      "cat": "桌宠",
-      "stylize": true,
-      "image_prompt": "Create a miniature desktop potted plant collectible inspired by {subject} colors/mood. Ceramic pot, healthy leaves, soft daylight, pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
-      "plays": [
-        {
-          "id": "play_sway",
-          "name": "叶子摇摆",
-          "video_prompt": "Plant leaves sway gently in breeze, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_bloom",
-          "name": "开花绽放",
-          "video_prompt": "A small bloom opens on the plant, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        },
-        {
-          "id": "play_grow",
-          "name": "浇水生长",
-          "video_prompt": "Subtle growth bounce after watering sparkle, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
-        }
-      ]
-    },
-    {
       "id": "tpl_03_cafe",
-      "n": "17",
-      "name": "咖啡店打卡",
-      "cat": "真人雕塑",
+      "n": "09",
+      "name": "变身咖啡店打卡",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "image_prompt": "Transform {subject} into a miniature cafe check-in diorama figure. Cozy coffee shop props (cup, table, small plant), warm soft light, cute desktop collectible, pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
@@ -459,9 +279,11 @@
     },
     {
       "id": "tpl_15_family",
-      "n": "18",
-      "name": "立体全家福",
-      "cat": "真人雕塑",
+      "n": "10",
+      "name": "变身立体全家福",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "image_prompt": "Transform the family/group in the reference photo into a 3D family portrait figurine set. Preserve relative ages, hairstyles, clothing colors. pure white studio backdrop, collectible sculpture, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
@@ -484,9 +306,11 @@
     },
     {
       "id": "tpl_17_wedding",
-      "n": "19",
-      "name": "微雕塑婚礼瞬间",
-      "cat": "真人雕塑",
+      "n": "11",
+      "name": "变身婚礼微雕塑",
+      "hub": "person",
+      "hub_name": "真人全息动态",
+      "cat": "真人",
       "stylize": true,
       "image_prompt": "Transform wedding/couple reference into a miniature wedding moment sculpture. Preserve outfits and identities, romantic soft light, pure white studio backdrop, premium collectible, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
       "plays": [
@@ -504,6 +328,226 @@
           "id": "play_dance",
           "name": "新婚舞步",
           "video_prompt": "Couple figurines do a small wedding sway dance, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_00_pet_realtime",
+      "n": "00",
+      "name": "宠物复刻",
+      "hub": "pet",
+      "hub_name": "宠物全息动态",
+      "cat": "宠物",
+      "stylize": false,
+      "input_note": "真实宠物照片；无风格化，白底单影复刻",
+      "image_prompt": "Keep the exact pet identity from the reference photo (breed, markings, fur color, face). Photorealistic pet product photo on a pure white studio backdrop, full subject in frame, 9:16 vertical, ready for hologram display. No stylization, no clay, no felt, no cartoon. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_wave",
+          "name": "抬头看镜头",
+          "video_prompt": "Pet looks up toward camera with a soft blink, keep exact identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_turn",
+          "name": "原地轻轻转圈",
+          "video_prompt": "Pet turns slowly in place then faces camera again, keep exact identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_cheer",
+          "name": "开心晃尾巴",
+          "video_prompt": "Pet shows a happy micro reaction (tail wag or ear perk), keep exact identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_12_clay_dog",
+      "n": "01",
+      "name": "粘土宠物",
+      "hub": "pet",
+      "hub_name": "宠物全息动态",
+      "cat": "宠物",
+      "stylize": true,
+      "image_prompt": "Transform the real pet in the reference photo into a handmade polymer-clay pet figurine (粘土宠物). Preserve species/breed, fur color pattern, ear shape and face markings. Soft clay material, fingerprint-friendly sculpt, cute big eyes, clean white background, product photography, 9:16. No photoreal fur. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_dance",
+          "name": "宠物跳舞",
+          "video_prompt": "Clay pet figurine does a cute little dance in place, keep clay look and markings, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_jump",
+          "name": "宠物跳高",
+          "video_prompt": "Clay pet figurine makes a small happy jump and lands, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_hello",
+          "name": "宠物打招呼",
+          "video_prompt": "Clay pet figurine sits and paws/waves hello toward camera, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_13_felt_cat",
+      "n": "02",
+      "name": "羊毛毡宠物",
+      "hub": "pet",
+      "hub_name": "宠物全息动态",
+      "cat": "宠物",
+      "stylize": true,
+      "image_prompt": "Transform the real pet in the reference photo into a needle-felted wool pet figurine (羊毛毡宠物). Preserve fur colors, markings, ear shape and body type. Soft wool fiber texture, handmade craft look, pure white studio backdrop, 9:16. No photoreal fur. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_stretch",
+          "name": "宠物伸懒腰",
+          "video_prompt": "Felt pet stretches lazily, soft wool look preserved, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_paw",
+          "name": "宠物扑爪",
+          "video_prompt": "Felt pet does a playful paw swipe, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_nuzzle",
+          "name": "宠物蹭头",
+          "video_prompt": "Felt pet nuzzles / head-rubs cute greeting, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_00_toy_realtime",
+      "n": "00",
+      "name": "玩具复刻",
+      "hub": "toy",
+      "hub_name": "玩具全息动态",
+      "cat": "玩具",
+      "stylize": false,
+      "input_note": "玩具/载具/物件清晰照片；无风格化，白底单影复刻",
+      "image_prompt": "Keep the exact toy / vehicle / object identity from the reference photo. Photorealistic product photo on a pure white studio backdrop, full subject in frame, 9:16 vertical, ready for hologram display. No stylization beyond clean product photography. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_wave",
+          "name": "轻微展示",
+          "video_prompt": "Toy/object does a subtle presentational tilt toward camera, keep exact identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_turn",
+          "name": "原地轻轻转圈",
+          "video_prompt": "Toy/object rotates slowly once then faces front, keep exact identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_cheer",
+          "name": "轻弹一下",
+          "video_prompt": "Toy/object makes a tiny bounce settle, keep exact identity, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_01_mecha",
+      "n": "01",
+      "name": "Q版机甲",
+      "hub": "toy",
+      "hub_name": "玩具全息动态",
+      "cat": "玩具",
+      "stylize": true,
+      "input_note": "玩具/角色照；Q版机甲收藏手办风",
+      "image_prompt": "Transform {subject} into a chibi Q-version mecha robot figure. Cute SD proportions, white/teal/lime armor accents, clean product render on white background, collectible toy look, sharp edges, soft studio shadow, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_charge",
+          "name": "机甲出击",
+          "video_prompt": "Chibi mecha steps forward and raises weapon, energetic but stable, keep design, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_guard",
+          "name": "防御姿态",
+          "video_prompt": "Chibi mecha lifts shield into guard pose, slight stance shift, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_powerup",
+          "name": "能量蓄力",
+          "video_prompt": "Chibi mecha charges energy glow on chest/eyes, idle power-up animation, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_07_vehicle",
+      "n": "02",
+      "name": "微缩载具",
+      "hub": "toy",
+      "hub_name": "玩具全息动态",
+      "cat": "玩具",
+      "stylize": true,
+      "input_note": "载具/物件照；微缩模型全貌展示",
+      "image_prompt": "Transform reference into a miniature vehicle collectible (match vehicle type if present; otherwise cute personal mini car/scooter themed to subject colors). Die-cast / model kit look, pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_start",
+          "name": "启动加速",
+          "video_prompt": "Mini vehicle starts and rolls forward slightly, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_drift",
+          "name": "小漂移",
+          "video_prompt": "Mini vehicle does a tiny drift turn, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_lights",
+          "name": "亮灯鸣笛",
+          "video_prompt": "Mini vehicle lights blink and subtle horn motion, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_09_guochao",
+      "n": "03",
+      "name": "数字国潮摆件",
+      "hub": "toy",
+      "hub_name": "玩具全息动态",
+      "cat": "玩具",
+      "stylize": true,
+      "image_prompt": "Transform {subject} cues into a digital Guochao ornament / mythical guardian figure (auspicious beast motif inspired by subject colors). Jade, gold, lacquer accents, premium desktop ornament render on pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_nod",
+          "name": "祥瑞点头",
+          "video_prompt": "Guochao ornament nods once auspiciously, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_glow",
+          "name": "纹样发光",
+          "video_prompt": "Patterns/eyes glow softly then settle, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_guard",
+          "name": "守护姿态",
+          "video_prompt": "Ornament shifts into a guardian stance, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        }
+      ]
+    },
+    {
+      "id": "tpl_14_plant",
+      "n": "04",
+      "name": "桌面盆栽",
+      "hub": "toy",
+      "hub_name": "玩具全息动态",
+      "cat": "玩具",
+      "stylize": true,
+      "image_prompt": "Create a miniature desktop potted plant collectible inspired by {subject} colors/mood. Ceramic pot, healthy leaves, soft daylight, pure white studio backdrop, 9:16. Front key light from camera direction (frontal lighting), soft and even. Exactly one cast shadow behind the subject on the floor/backdrop. No multi-light setup, no strong side/rim lights, no multiple shadows.",
+      "plays": [
+        {
+          "id": "play_sway",
+          "name": "叶子摇摆",
+          "video_prompt": "Plant leaves sway gently in breeze, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_bloom",
+          "name": "开花绽放",
+          "video_prompt": "A small bloom opens on the plant, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
+        },
+        {
+          "id": "play_grow",
+          "name": "浇水生长",
+          "video_prompt": "Subtle growth bounce after watering sparkle, 4s Strictly inherit first-frame lighting: keep frontal key light and exactly one shadow behind the subject. The single shadow must move and deform naturally with the subject motion. Do not add a second light or second shadow; do not change light direction or intensity."
         }
       ]
     }
