@@ -41,3 +41,6 @@ docs/prototypes/**/covers-v2/_new_hub_*.png
 
 # diy-waterfall is the junction target for Prototype covers; avoid double-tracking
 docs/prototypes/diy-waterfall/
+
+# Prototype moved to sibling repo: ../XOLOME DIY Tab Prototype/
+
